@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forward Exchange Rate Calculator | CFA Institute</title>
+  <meta name="description" content="Interactive forward exchange rate calculator demonstrating covered interest rate parity">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="cfa-base.css">
+  <link rel="stylesheet" href="forward-exchange-specific.css">
+  
+  <!-- Chart.js for visualization -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- Skip Links for Accessibility -->
+    <nav role="navigation" aria-label="Skip links">
+      <a href="#calculator" class="skip-link">Skip to calculator</a>
+      <a href="#visualizer" class="skip-link">Skip to chart</a>
+    </nav>
+    
+    <main class="content">
+      <!-- Card 1: Equation -->
+      <section id="equation-card" class="card">
+        <h4 class="card-title">Covered Interest Rate Parity Equation</h4>
+        <p class="equation-intro">
+          This equation calculates the forward exchange rate that prevents arbitrage opportunities.
+        </p>
+        
+        <!-- Dynamic equation with actual values -->
+        <div class="equation-container" role="region" aria-label="Forward exchange rate calculation" aria-live="polite" id="dynamic-equation-container">
+          <div id="dynamic-mathml-equation">
+            <!-- Populated by JavaScript -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Cards 2 & 3: Results and Visualizer -->
+      <div class="grid-container">
+        <!-- Card 2: Results & Analysis -->
+        <div class="grid-item-left">
+          <section class="card" id="results-card">
+            <h4 class="card-title">Results and Analysis</h4>
+            <div class="card-content">
+              <div id="results-content">
+                <!-- Populated by JavaScript -->
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Card 3: Visualizer -->
+        <div class="grid-item-right">
+          <section class="card" id="visualizer" tabindex="-1">
+            <h4 class="card-title">Forward Exchange Rate Analysis</h4>
+            <div class="card-content">
+              <!-- Legend -->
+              <div class="legend" id="chart-legend" role="list" aria-label="Chart legend">
+                <span class="legend-item" role="listitem">
+                  <span class="legend-color" style="background-color: #00bbff; border: 2px solid #06005a;"></span>
+                  Spot rate (t=0)
+                </span>
+                <span class="legend-item" role="listitem">
+                  <span class="legend-color" style="background-color: #50037f; border: 2px solid #06005a;"></span>
+                  Forward rate (t=1)
+                </span>
+                <span class="legend-item" role="listitem">
+                  <span class="legend-color" style="background-color: #7a46ff;"></span>
+                  Domestic rate
+                </span>
+                <span class="legend-item" role="listitem">
+                  <span class="legend-color" style="background-color: #ea792d;"></span>
+                  Foreign rate
+                </span>
+              </div>
+
+              <!-- Hidden chart description -->
+              <div class="sr-only" id="exchange-chart-desc">
+                <h4 id="exchange-chart-title">Forward exchange rate analysis</h4>
+                <p>
+                  This chart shows the spot and forward exchange rates as bars, with domestic and foreign interest rates as line overlays.
+                  The forward rate is calculated using covered interest rate parity to prevent arbitrage opportunities.
+                </p>
+              </div>
+
+              <!-- Chart container -->
+              <div id="chart-container" class="chart-wrapper" 
+                   role="region" 
+                   aria-labelledby="exchange-chart-title" 
+                   aria-describedby="exchange-chart-desc"
+                   tabindex="-1"
+                   style="height: 28rem;">
+                <canvas id="exchange-chart"></canvas>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <!-- Card 4: Calculator -->
+      <section class="card" id="calculator" tabindex="-1">
+        <h4 class="card-title">Forward Exchange Rate Calculator</h4>
+        <div class="card-content">
+          <!-- Input controls -->
+          <div class="input-section">
+            <p class="sr-only" id="inputHelp">
+              Enter exchange and interest rates and the calculator updates results automatically.
+            </p>
+
+            <div class="input-group-inline">
+              <div class="input-inline">
+                <label for="spot-rate" class="input-label-inline">
+                  Spot exchange rate:
+                </label>
+                <div class="input-with-suffix-inline">
+                  <input 
+                    type="number" 
+                    id="spot-rate" 
+                    class="input-field-inline"
+                    min="0.0001" max="10" step="0.0001" value="1.2602">
+                  <span class="input-suffix-inline">&nbsp;</span>
+                </div>
+              </div>
+
+              <div class="input-inline">
+                <label for="domestic-rate" class="input-label-inline">
+                  Domestic rate <span style="color: #7a46ff;">(r<sub>d</sub>)</span>:
+                </label>
+                <div class="input-with-suffix-inline">
+                  <input 
+                    type="number" 
+                    id="domestic-rate" 
+                    class="input-field-inline"
+                    min="-99" max="50" step="0.001" value="2.360">
+                  <span class="input-suffix-inline">%</span>
+                </div>
+              </div>
+
+              <div class="input-inline">
+                <label for="foreign-rate" class="input-label-inline">
+                  Foreign rate <span style="color: #ea792d;">(r<sub>f</sub>)</span>:
+                </label>
+                <div class="input-with-suffix-inline">
+                  <input 
+                    type="number" 
+                    id="foreign-rate" 
+                    class="input-field-inline"
+                    min="-99" max="50" step="0.001" value="2.430">
+                  <span class="input-suffix-inline">%</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Validation summary -->
+            <div id="validation-summary" class="validation-summary" role="alert" style="display: none;">
+              <div class="validation-title">Please correct the following:</div>
+              <ul id="validation-list"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- JavaScript Modules -->
+  <script type="module" src="forward-exchange-calculator.js"></script>
+</body>
+</html>
