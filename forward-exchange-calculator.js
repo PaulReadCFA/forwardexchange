@@ -6,10 +6,39 @@ import { $, listen, debounce, formatCurrency, formatPercentage } from './exchang
 function init() {
   console.log('Forward Exchange Rate Calculator initializing...');
   setupInputListeners();
+  setupViewToggle();
   subscribe(handleStateChange);
   updateCalculations();
   runSelfTests();
   console.log('Forward Exchange Rate Calculator ready');
+}
+
+function setupViewToggle() {
+  const chartBtn = $('#view-chart-btn');
+  const tableBtn = $('#view-table-btn');
+  const chartView = $('#chart-view');
+  const tableView = $('#table-view');
+  
+  if (!chartBtn || !tableBtn || !chartView || !tableView) return;
+  
+  listen(chartBtn, 'click', () => {
+    chartView.style.display = 'block';
+    tableView.style.display = 'none';
+    chartBtn.classList.add('active');
+    tableBtn.classList.remove('active');
+    chartBtn.setAttribute('aria-pressed', 'true');
+    tableBtn.setAttribute('aria-pressed', 'false');
+  });
+  
+  listen(tableBtn, 'click', () => {
+    chartView.style.display = 'none';
+    tableView.style.display = 'block';
+    chartBtn.classList.remove('active');
+    tableBtn.classList.add('active');
+    chartBtn.setAttribute('aria-pressed', 'false');
+    tableBtn.setAttribute('aria-pressed', 'true');
+    renderTable(state.exchangeCalculations, state);
+  });
 }
 
 function setupInputListeners() {
@@ -76,9 +105,9 @@ function renderResults(calc, params) {
         No-arbitrage forward rate
       </div>
       <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb; font-size: 0.75rem; color: #6b7280;">
-        <div><strong>Formula:</strong> F = S × e<sup>(r<sub>f</sub> - r<sub>d</sub>)</sup></div>
+        <div><strong>Formula:</strong> F = S × e<sup>(r<sub>f</sub> − r<sub>d</sub>)</sup></div>
         <div style="color: ${calc.noArbitrage ? '#15803d' : '#b91c1c'}; font-weight: 600; margin-top: 0.5rem;">
-          ${calc.noArbitrage ? '✓ No arbitrage condition satisfied' : '⚠ Arbitrage difference: $' + calc.arbitrageDiff.toFixed(2)}
+          ${calc.noArbitrage ? '✓ No arbitrage condition satisfied' : '⚠ Arbitrage difference: USD ' + calc.arbitrageDiff.toFixed(2)}
         </div>
       </div>
     </div>
@@ -86,7 +115,7 @@ function renderResults(calc, params) {
     <div class="result-box domestic-strategy">
       <h5 class="result-title" style="color: #15803d; font-size: 1rem; font-weight: 600;">Domestic Investment</h5>
       <div class="strategy-details">
-        <div>Invest $1,000 at ${formatPercentage(params.domesticRate)}</div>
+        <div>Invest USD 1,000 at ${formatPercentage(params.domesticRate)}</div>
         <div style="font-weight: 600; padding-top: 0.5rem; border-top: 1px solid #d1fae5; margin-top: 0.5rem;">
           Final: ${formatCurrency(calc.domesticEndingValue)}
         </div>
@@ -138,7 +167,7 @@ function renderDynamicEquation(calc, params) {
     <div style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: #374151; font-family: monospace; background: #f3f4f6; padding: 0.75rem; border-radius: 0.375rem;">
       <div style="margin-bottom: 0.5rem;"><strong>Substituting values:</strong></div>
       <div style="color: #4b5563;">
-        F = <span style="color: #00bbff; font-weight: 600;">${params.spotRate.toFixed(4)}</span> × e<sup>(<span style="color: #ea792d; font-weight: 600;">${rf}</span> - <span style="color: #7a46ff; font-weight: 600;">${rd}</span>)</sup>
+        F = <span style="color: #00bbff; font-weight: 600;">${params.spotRate.toFixed(4)}</span> × e<sup>(<span style="color: #ea792d; font-weight: 600;">${rf}</span> − <span style="color: #7a46ff; font-weight: 600;">${rd}</span>)</sup>
       </div>
       <div style="margin-top: 0.5rem; color: #50037f; font-weight: 700; font-size: 1rem;">
         = ${calc.forwardRate.toFixed(4)}
@@ -156,6 +185,39 @@ function renderDynamicEquation(calc, params) {
   `;
   
   container.innerHTML = mathML;
+}
+
+function renderTable(calc, params) {
+  const tableBody = $('#table-body');
+  if (!tableBody || !calc) return;
+  
+  tableBody.innerHTML = `
+    <tr>
+      <th scope="row">Exchange Rate</th>
+      <td>${params.spotRate.toFixed(4)}</td>
+      <td>${calc.forwardRate.toFixed(4)}</td>
+    </tr>
+    <tr>
+      <th scope="row">Domestic Rate</th>
+      <td>${formatPercentage(params.domesticRate)}</td>
+      <td>${formatPercentage(params.domesticRate)}</td>
+    </tr>
+    <tr>
+      <th scope="row">Foreign Rate</th>
+      <td>${formatPercentage(params.foreignRate)}</td>
+      <td>${formatPercentage(params.foreignRate)}</td>
+    </tr>
+    <tr>
+      <th scope="row">Domestic Investment</th>
+      <td>USD 1,000</td>
+      <td>${formatCurrency(calc.domesticEndingValue)}</td>
+    </tr>
+    <tr>
+      <th scope="row">Foreign Investment (converted)</th>
+      <td>USD 1,000</td>
+      <td>${formatCurrency(calc.domesticEquivalent)}</td>
+    </tr>
+  `;
 }
 
 function renderChart(calc, params) {
@@ -231,19 +293,53 @@ function renderChart(calc, params) {
         }
       },
       scales: {
+        x: {
+          ticks: {
+            color: '#374151',
+            font: { weight: 600 }
+          },
+          grid: {
+            color: '#e5e7eb'
+          }
+        },
         'y-exchange': {
           position: 'left',
-          title: { display: true, text: 'Exchange Rate' },
+          title: { 
+            display: true, 
+            text: 'Exchange Rate',
+            color: '#374151',
+            font: { weight: 600 }
+          },
           min: Math.max(0, minEx - exPadding),
           max: maxEx + exPadding,
-          ticks: { callback: (v) => v.toFixed(2) }
+          ticks: { 
+            callback: (v) => v.toFixed(2),
+            color: '#374151',
+            font: { weight: 500 }
+          },
+          grid: {
+            color: '#e5e7eb'
+          }
         },
         'y-rate': {
           position: 'right',
-          title: { display: true, text: 'Interest Rate (%)' },
+          title: { 
+            display: true, 
+            text: 'Interest Rate (%)',
+            color: '#374151',
+            font: { weight: 600 }
+          },
           min: Math.max(0, minRate - ratePadding),
           max: maxRate + ratePadding,
-          ticks: { callback: (v) => `${v.toFixed(2)}%` }
+          ticks: { 
+            callback: (v) => v.toFixed(2),
+            color: '#374151',
+            font: { weight: 500 }
+          },
+          grid: {
+            drawOnChartArea: false,
+            color: '#e5e7eb'
+          }
         }
       }
     }

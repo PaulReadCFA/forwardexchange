@@ -22,7 +22,7 @@
     </nav>
     
     <main class="content">
-      <!-- Card 1: Equation -->
+      <!-- Card 1: Dynamic Equation -->
       <section id="equation-card" class="card">
         <h4 class="card-title">Covered Interest Rate Parity Equation</h4>
         <p class="equation-intro">
@@ -37,69 +37,7 @@
         </div>
       </section>
 
-      <!-- Cards 2 & 3: Results and Visualizer -->
-      <div class="grid-container">
-        <!-- Card 2: Results & Analysis -->
-        <div class="grid-item-left">
-          <section class="card" id="results-card">
-            <h4 class="card-title">Results and Analysis</h4>
-            <div class="card-content">
-              <div id="results-content">
-                <!-- Populated by JavaScript -->
-              </div>
-            </div>
-          </section>
-        </div>
-
-        <!-- Card 3: Visualizer -->
-        <div class="grid-item-right">
-          <section class="card" id="visualizer" tabindex="-1">
-            <h4 class="card-title">Forward Exchange Rate Analysis</h4>
-            <div class="card-content">
-              <!-- Legend -->
-              <div class="legend" id="chart-legend" role="list" aria-label="Chart legend">
-                <span class="legend-item" role="listitem">
-                  <span class="legend-color" style="background-color: #00bbff; border: 2px solid #06005a;"></span>
-                  Spot rate (t=0)
-                </span>
-                <span class="legend-item" role="listitem">
-                  <span class="legend-color" style="background-color: #50037f; border: 2px solid #06005a;"></span>
-                  Forward rate (t=1)
-                </span>
-                <span class="legend-item" role="listitem">
-                  <span class="legend-color" style="background-color: #7a46ff;"></span>
-                  Domestic rate
-                </span>
-                <span class="legend-item" role="listitem">
-                  <span class="legend-color" style="background-color: #ea792d;"></span>
-                  Foreign rate
-                </span>
-              </div>
-
-              <!-- Hidden chart description -->
-              <div class="sr-only" id="exchange-chart-desc">
-                <h4 id="exchange-chart-title">Forward exchange rate analysis</h4>
-                <p>
-                  This chart shows the spot and forward exchange rates as bars, with domestic and foreign interest rates as line overlays.
-                  The forward rate is calculated using covered interest rate parity to prevent arbitrage opportunities.
-                </p>
-              </div>
-
-              <!-- Chart container -->
-              <div id="chart-container" class="chart-wrapper" 
-                   role="region" 
-                   aria-labelledby="exchange-chart-title" 
-                   aria-describedby="exchange-chart-desc"
-                   tabindex="-1"
-                   style="height: 28rem;">
-                <canvas id="exchange-chart"></canvas>
-              </div>
-            </div>
-          </section>
-        </div>
-      </div>
-
-      <!-- Card 4: Calculator -->
+      <!-- Card 2: Calculator -->
       <section class="card" id="calculator" tabindex="-1">
         <h4 class="card-title">Forward Exchange Rate Calculator</h4>
         <div class="card-content">
@@ -158,6 +96,89 @@
               <div class="validation-title">Please correct the following:</div>
               <ul id="validation-list"></ul>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 3: Chart/Table Visualizer -->
+      <section class="card" id="visualizer" tabindex="-1">
+        <div class="card-header-with-controls">
+          <h4 class="card-title">Forward Exchange Rate Analysis</h4>
+          <div class="button-group">
+            <button id="view-chart-btn" class="toggle-btn active" aria-pressed="true">Chart</button>
+            <button id="view-table-btn" class="toggle-btn" aria-pressed="false">Table</button>
+          </div>
+        </div>
+        <div class="card-content">
+          <!-- Chart View -->
+          <div id="chart-view">
+            <!-- Legend -->
+            <div class="legend" id="chart-legend" role="list" aria-label="Chart legend">
+              <span class="legend-item" role="listitem">
+                <span class="legend-color" style="background-color: #00bbff; border: 2px solid #06005a;"></span>
+                Spot rate (t=0)
+              </span>
+              <span class="legend-item" role="listitem">
+                <span class="legend-color" style="background-color: #50037f; border: 2px solid #06005a;"></span>
+                Forward rate (t=1)
+              </span>
+              <span class="legend-item" role="listitem">
+                <span class="legend-color" style="background-color: #7a46ff;"></span>
+                Domestic rate
+              </span>
+              <span class="legend-item" role="listitem">
+                <span class="legend-color" style="background-color: #ea792d;"></span>
+                Foreign rate
+              </span>
+            </div>
+
+            <!-- Hidden chart description -->
+            <div class="sr-only" id="exchange-chart-desc">
+              <h4 id="exchange-chart-title">Forward exchange rate analysis</h4>
+              <p>
+                This chart shows the spot and forward exchange rates as bars, with domestic and foreign interest rates as line overlays.
+                The forward rate is calculated using covered interest rate parity to prevent arbitrage opportunities.
+              </p>
+            </div>
+
+            <!-- Chart container -->
+            <div id="chart-container" class="chart-wrapper" 
+                 role="region" 
+                 aria-labelledby="exchange-chart-title" 
+                 aria-describedby="exchange-chart-desc"
+                 tabindex="-1"
+                 style="height: 28rem;">
+              <canvas id="exchange-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Table View (hidden by default) -->
+          <div id="table-view" style="display: none;">
+            <div class="table-wrapper">
+              <table id="data-table" class="data-table" tabindex="0">
+                <caption>Forward Exchange Rate Analysis Data</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Metric</th>
+                    <th scope="col">t = 0</th>
+                    <th scope="col">t = 1</th>
+                  </tr>
+                </thead>
+                <tbody id="table-body">
+                  <!-- Populated by JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 4: Results & Analysis -->
+      <section class="card" id="results-card">
+        <h4 class="card-title">Results and Analysis</h4>
+        <div class="card-content">
+          <div id="results-content">
+            <!-- Populated by JavaScript -->
           </div>
         </div>
       </section>
