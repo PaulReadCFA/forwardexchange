@@ -3,7 +3,7 @@ export function calculateForwardExchange({ spotRate, domesticRate, foreignRate }
   const r_f = foreignRate / 100;
   const initialInvestment = 1000;
   
-  // Forward rate using covered interest rate parity: F = S × e^(r_f - r_d)
+  // Forward rate using covered interest rate parity: F = S Ã— e^(r_f - r_d)
   const forwardRate = spotRate * Math.exp(r_f - r_d);
   
   // Domestic investment strategy

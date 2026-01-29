@@ -3,43 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Forward Exchange Rate Calculator | CFA Institute</title>
-  <meta name="description" content="Interactive forward exchange rate calculator demonstrating covered interest rate parity">
+  <title>Implied Forward Exchange Rate Calculator | CFA Institute</title>
+  <meta name="description" content="Interactive implied forward exchange rate calculator demonstrating covered interest rate parity">
   
   <!-- Styles -->
   <link rel="stylesheet" href="cfa-base.css">
   <link rel="stylesheet" href="forward-exchange-specific.css">
   
+  <!-- MathJax 2.7.7 for mathematical equations -->
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        inlineMath: [['$','$'], ['\\(','\\)']],
+        displayMath: [['$$','$$'], ['\\[','\\]']],
+        processEscapes: true
+      },
+      CommonHTML: { linebreaks: { automatic: true } },
+      "HTML-CSS": { linebreaks: { automatic: true } },
+      SVG: { linebreaks: { automatic: true } },
+      menuSettings: {
+        inTabOrder: false
+      },
+      MathML: {
+        useMathMLspacing: true
+      }
+    });
+    
+    // Add role="math" to MathJax output for accessibility
+    MathJax.Hub.Register.StartupHook("End", function() {
+      var spans = document.querySelectorAll('.MathJax');
+      spans.forEach(function(span) {
+        span.setAttribute('role', 'math');
+        span.removeAttribute('tabindex');
+      });
+    });
+  </script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
   <!-- Chart.js for visualization -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 </head>
 <body>
   <div class="container">
     <!-- Skip Links for Accessibility -->
     <nav role="navigation" aria-label="Skip links">
-      <a href="#calculator" class="skip-link">Skip to calculator</a>
-      <a href="#visualizer" class="skip-link">Skip to chart</a>
+      <a href="#spot-rate" class="skip-link">Skip to data entry</a>
+      <a href="#show-table" class="skip-link">Skip to data table</a>
     </nav>
     
     <main class="content">
-      <!-- Card 1: Dynamic Equation -->
+      <!-- Card 1: Static Equation (New) -->
+      <section id="static-equation-card" class="card">
+        <h4 class="card-title">Forward Exchange Rate Formula</h4>
+        
+        <!-- Static equation -->
+        <div class="equation-container" role="region" aria-label="Implied forward exchange rate formula">
+          <div id="static-equation" class="mathjax-equation">
+            $$\color{#50037f}{F_{0,f/d}} = \color{#0079a6}{S_{0,f/d}} \times e^{(\color{#ea792d}{r_f} - \color{#7a46ff}{r_d})}$$
+          </div>
+        </div>
+      </section>
+
+      <!-- Card 2: Dynamic Equation -->
       <section id="equation-card" class="card">
-        <h4 class="card-title">Covered Interest Rate Parity Equation</h4>
-        <p class="equation-intro">
-          This equation calculates the forward exchange rate that prevents arbitrage opportunities.
-        </p>
+        <h4 class="card-title">Calculation with Your Inputs</h4>
         
         <!-- Dynamic equation with actual values -->
-        <div class="equation-container" role="region" aria-label="Forward exchange rate calculation" aria-live="polite" id="dynamic-equation-container">
-          <div id="dynamic-mathml-equation">
+        <div class="equation-container" role="region" aria-label="Forward exchange rate calculation with your values" aria-live="polite" id="dynamic-equation-container">
+          <div id="dynamic-mathml-equation" class="mathjax-equation">
             <!-- Populated by JavaScript -->
           </div>
         </div>
       </section>
 
-      <!-- Card 2: Calculator -->
+      <!-- Card 3: Calculator -->
       <section class="card" id="calculator" tabindex="-1">
-        <h4 class="card-title">Forward Exchange Rate Calculator</h4>
+        <h4 class="card-title">Implied Forward Exchange Rate Calculator</h4>
         <div class="card-content">
           <!-- Input controls -->
           <div class="input-section">
@@ -50,14 +90,15 @@
             <div class="input-group-inline">
               <div class="input-inline">
                 <label for="spot-rate" class="input-label-inline">
-                  Spot exchange rate:
+                  Spot exchange rate <span style="color: #0079a6;">(S)</span>:
                 </label>
                 <div class="input-with-suffix-inline">
                   <input 
                     type="number" 
                     id="spot-rate" 
                     class="input-field-inline"
-                    min="0.0001" max="10" step="0.0001" value="1.2602">
+                    min="0.0001" max="10" step="0.01" value="1.26"
+                    aria-describedby="inputHelp">
                   <span class="input-suffix-inline">&nbsp;</span>
                 </div>
               </div>
@@ -71,7 +112,8 @@
                     type="number" 
                     id="domestic-rate" 
                     class="input-field-inline"
-                    min="-99" max="50" step="0.001" value="2.360">
+                    min="-99" max="50" step="0.1" value="2.5"
+                    aria-describedby="inputHelp">
                   <span class="input-suffix-inline">%</span>
                 </div>
               </div>
@@ -85,14 +127,15 @@
                     type="number" 
                     id="foreign-rate" 
                     class="input-field-inline"
-                    min="-99" max="50" step="0.001" value="2.430">
+                    min="-99" max="50" step="0.1" value="3.0"
+                    aria-describedby="inputHelp">
                   <span class="input-suffix-inline">%</span>
                 </div>
               </div>
             </div>
 
             <!-- Validation summary -->
-            <div id="validation-summary" class="validation-summary" role="alert" style="display: none;">
+            <div id="validation-summary" class="validation-summary" role="alert" aria-live="assertive" style="display: none;">
               <div class="validation-title">Please correct the following:</div>
               <ul id="validation-list"></ul>
             </div>
@@ -100,26 +143,42 @@
         </div>
       </section>
 
-      <!-- Card 3: Chart/Table Visualizer -->
+      <!-- Card 4: Chart/Table Visualizer -->
       <section class="card" id="visualizer" tabindex="-1">
         <div class="card-header-with-controls">
           <h4 class="card-title">Forward Exchange Rate Analysis</h4>
-          <div class="button-group">
-            <button id="view-chart-btn" class="toggle-btn active" aria-pressed="true">Chart</button>
-            <button id="view-table-btn" class="toggle-btn" aria-pressed="false">Table</button>
+          <div class="button-group" role="tablist" aria-label="View selector">
+            <button 
+              id="view-chart-btn" 
+              class="toggle-btn active" 
+              role="tab" 
+              aria-selected="true" 
+              aria-controls="chart-view"
+              aria-label="Chart">
+              Chart
+            </button>
+            <button 
+              id="view-table-btn" 
+              class="toggle-btn" 
+              role="tab" 
+              aria-selected="false" 
+              aria-controls="table-view"
+              aria-label="Table">
+              Table
+            </button>
           </div>
         </div>
         <div class="card-content">
           <!-- Chart View -->
-          <div id="chart-view">
+          <div id="chart-view" role="tabpanel" aria-labelledby="view-chart-btn">
             <!-- Legend -->
             <div class="legend" id="chart-legend" role="list" aria-label="Chart legend">
               <span class="legend-item" role="listitem">
-                <span class="legend-color" style="background-color: #00bbff; border: 2px solid #06005a;"></span>
+                <span class="legend-color" style="background-color: #0079a6;"></span>
                 Spot rate (t=0)
               </span>
               <span class="legend-item" role="listitem">
-                <span class="legend-color" style="background-color: #50037f; border: 2px solid #06005a;"></span>
+                <span class="legend-color" style="background-color: #50037f;"></span>
                 Forward rate (t=1)
               </span>
               <span class="legend-item" role="listitem">
@@ -143,17 +202,17 @@
 
             <!-- Chart container -->
             <div id="chart-container" class="chart-wrapper" 
-                 role="region" 
+                 role="img" 
                  aria-labelledby="exchange-chart-title" 
                  aria-describedby="exchange-chart-desc"
-                 tabindex="-1"
+                 tabindex="0"
                  style="height: 28rem;">
               <canvas id="exchange-chart"></canvas>
             </div>
           </div>
 
           <!-- Table View (hidden by default) -->
-          <div id="table-view" style="display: none;">
+          <div id="table-view" role="tabpanel" aria-labelledby="view-table-btn" style="display: none;">
             <div class="table-wrapper">
               <table id="data-table" class="data-table" tabindex="0">
                 <caption>Forward Exchange Rate Analysis Data</caption>
@@ -173,17 +232,20 @@
         </div>
       </section>
 
-      <!-- Card 4: Results & Analysis -->
+      <!-- Card 5: Results & Analysis -->
       <section class="card" id="results-card">
         <h4 class="card-title">Results and Analysis</h4>
         <div class="card-content">
-          <div id="results-content">
+          <div id="results-content" aria-live="polite" aria-atomic="true">
             <!-- Populated by JavaScript -->
           </div>
         </div>
       </section>
     </main>
   </div>
+
+  <!-- Hidden element for skip link target -->
+  <div id="show-table" style="position: absolute; width: 1px; height: 1px; overflow: hidden;"></div>
 
   <!-- JavaScript Modules -->
   <script type="module" src="forward-exchange-calculator.js"></script>

@@ -4,40 +4,117 @@ import { validateField, updateFieldError, updateValidationSummary, hasErrors } f
 import { $, listen, debounce, formatCurrency, formatPercentage } from './exchange-modules/utils.js';
 
 function init() {
-  console.log('Forward Exchange Rate Calculator initializing...');
+  console.log('Implied Forward Exchange Rate Calculator initializing...');
   setupInputListeners();
   setupViewToggle();
+  setupSkipLinks();
   subscribe(handleStateChange);
   updateCalculations();
+  
+  // Render MathJax after initial load and fix accessibility
+  if (window.MathJax) {
+    window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub], function() {
+      // Remove tabindex and add role="math" to all MathJax elements
+      const spans = document.querySelectorAll('.MathJax');
+      spans.forEach(function(span) {
+        span.setAttribute('role', 'math');
+        span.removeAttribute('tabindex');
+      });
+    });
+  }
+  
   runSelfTests();
-  console.log('Forward Exchange Rate Calculator ready');
+  console.log('Implied Forward Exchange Rate Calculator ready');
 }
 
-function setupViewToggle() {
+function setupSkipLinks() {
+  // Handle "Skip to data table" link
+  const skipToTableLink = document.querySelector('a[href="#show-table"]');
+  if (skipToTableLink) {
+    listen(skipToTableLink, 'click', (e) => {
+      e.preventDefault();
+      const tableBtn = $('#view-table-btn');
+      if (tableBtn) {
+        // Switch to table view
+        switchToTableView();
+        // Focus the table button
+        setTimeout(() => tableBtn.focus(), 100);
+      }
+    });
+  }
+}
+
+function switchToChartView() {
   const chartBtn = $('#view-chart-btn');
   const tableBtn = $('#view-table-btn');
   const chartView = $('#chart-view');
   const tableView = $('#table-view');
   
-  if (!chartBtn || !tableBtn || !chartView || !tableView) return;
+  if (!chartView || !tableView || !chartBtn || !tableBtn) return;
   
+  chartView.style.display = 'block';
+  tableView.style.display = 'none';
+  chartBtn.classList.add('active');
+  tableBtn.classList.remove('active');
+  chartBtn.setAttribute('aria-selected', 'true');
+  tableBtn.setAttribute('aria-selected', 'false');
+}
+
+function switchToTableView() {
+  const chartBtn = $('#view-chart-btn');
+  const tableBtn = $('#view-table-btn');
+  const chartView = $('#chart-view');
+  const tableView = $('#table-view');
+  
+  if (!chartView || !tableView || !chartBtn || !tableBtn) return;
+  
+  chartView.style.display = 'none';
+  tableView.style.display = 'block';
+  chartBtn.classList.remove('active');
+  tableBtn.classList.add('active');
+  chartBtn.setAttribute('aria-selected', 'false');
+  tableBtn.setAttribute('aria-selected', 'true');
+  renderTable(state.exchangeCalculations, state);
+}
+
+function setupViewToggle() {
+  const chartBtn = $('#view-chart-btn');
+  const tableBtn = $('#view-table-btn');
+  
+  if (!chartBtn || !tableBtn) return;
+  
+  // Click handlers
   listen(chartBtn, 'click', () => {
-    chartView.style.display = 'block';
-    tableView.style.display = 'none';
-    chartBtn.classList.add('active');
-    tableBtn.classList.remove('active');
-    chartBtn.setAttribute('aria-pressed', 'true');
-    tableBtn.setAttribute('aria-pressed', 'false');
+    switchToChartView();
+    chartBtn.focus();
   });
   
   listen(tableBtn, 'click', () => {
-    chartView.style.display = 'none';
-    tableView.style.display = 'block';
-    chartBtn.classList.remove('active');
-    tableBtn.classList.add('active');
-    chartBtn.setAttribute('aria-pressed', 'false');
-    tableBtn.setAttribute('aria-pressed', 'true');
-    renderTable(state.exchangeCalculations, state);
+    switchToTableView();
+    tableBtn.focus();
+  });
+  
+  // Keyboard navigation - arrow keys
+  listen(chartBtn, 'keydown', (e) => {
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      switchToTableView();
+      tableBtn.focus();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      // Already on leftmost button
+    }
+  });
+  
+  listen(tableBtn, 'keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      switchToChartView();
+      chartBtn.focus();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      // Already on rightmost button
+    }
   });
 }
 
@@ -99,37 +176,28 @@ function renderResults(calc, params) {
   
   container.innerHTML = `
     <div class="result-box forward-exchange">
-      <h5 class="result-title forward-exchange">Forward Exchange Rate</h5>
-      <div class="result-value" aria-live="polite">${calc.forwardRate.toFixed(4)}</div>
-      <div class="result-description" style="font-size: 0.875rem; margin-top: 0.5rem;">
-        No-arbitrage forward rate
-      </div>
-      <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb; font-size: 0.75rem; color: #6b7280;">
-        <div><strong>Formula:</strong> F = S × e<sup>(r<sub>f</sub> − r<sub>d</sub>)</sup></div>
-        <div style="color: ${calc.noArbitrage ? '#15803d' : '#b91c1c'}; font-weight: 600; margin-top: 0.5rem;">
-          ${calc.noArbitrage ? '✓ No arbitrage condition satisfied' : '⚠ Arbitrage difference: USD ' + calc.arbitrageDiff.toFixed(2)}
-        </div>
-      </div>
+      <h5 class="result-title forward-exchange">Forward Exchange Rate Result</h5>
+      <div class="result-value" style="color: #50037f;" aria-live="polite">${calc.forwardRate.toFixed(4)}</div>
     </div>
     
     <div class="result-box domestic-strategy">
-      <h5 class="result-title" style="color: #15803d; font-size: 1rem; font-weight: 600;">Domestic Investment</h5>
+      <h5 class="result-title" style="color: #5a20cc;">Domestic Investment Strategy</h5>
       <div class="strategy-details">
-        <div>Invest USD 1,000 at ${formatPercentage(params.domesticRate)}</div>
-        <div style="font-weight: 600; padding-top: 0.5rem; border-top: 1px solid #d1fae5; margin-top: 0.5rem;">
+        <div style="color: #1f2937;">Invest USD 1,000 at ${formatPercentage(params.domesticRate)}</div>
+        <div style="font-weight: 600; padding-top: 0.5rem; border-top: 1px solid #e9d5ff; margin-top: 0.5rem; color: #1f2937;">
           Final: ${formatCurrency(calc.domesticEndingValue)}
         </div>
       </div>
     </div>
     
     <div class="result-box foreign-strategy">
-      <h5 class="result-title" style="color: #7a46ff; font-size: 1rem; font-weight: 600;">Foreign Investment</h5>
+      <h5 class="result-title" style="color: #a84f15;">Foreign Investment Strategy</h5>
       <div class="strategy-details">
-        <div>Convert → invest at ${formatPercentage(params.foreignRate)} → convert back</div>
-        <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 0.25rem;">
+        <div style="color: #1f2937;">Convert → invest at ${formatPercentage(params.foreignRate)} → convert back</div>
+        <div style="font-size: 0.75rem; color: #4b5563; margin-top: 0.25rem;">
           Foreign: ${calc.foreignCurrencyAmount.toFixed(2)} @ ${formatPercentage(params.foreignRate)} = ${calc.foreignEndingValue.toFixed(2)}
         </div>
-        <div style="font-weight: 600; padding-top: 0.5rem; border-top: 1px solid #ede9fe; margin-top: 0.5rem;">
+        <div style="font-weight: 600; padding-top: 0.5rem; border-top: 1px solid #fed7aa; margin-top: 0.5rem; color: #1f2937;">
           Final: ${formatCurrency(calc.domesticEquivalent)}
         </div>
       </div>
@@ -141,50 +209,28 @@ function renderDynamicEquation(calc, params) {
   const container = $('#dynamic-mathml-equation');
   if (!container) return;
   
-  const rd = (params.domesticRate / 100).toFixed(5);
-  const rf = (params.foreignRate / 100).toFixed(5);
+  const rd = (params.domesticRate / 100).toFixed(3);
+  const rf = (params.foreignRate / 100).toFixed(3);
   
-  const mathML = `
-    <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
-      <mrow>
-        <mi mathcolor="#50037f" mathvariant="bold">F</mi>
-        <mo>=</mo>
-        <mi mathcolor="#00bbff">S</mi>
-        <mo>×</mo>
-        <msup>
-          <mi>e</mi>
-          <mrow>
-            <mo>(</mo>
-            <msub><mi mathcolor="#ea792d">r</mi><mi>f</mi></msub>
-            <mo>−</mo>
-            <msub><mi mathcolor="#7a46ff">r</mi><mi>d</mi></msub>
-            <mo>)</mo>
-          </mrow>
-        </msup>
-      </mrow>
-    </math>
-    
-    <div style="text-align: center; margin-top: 1rem; font-size: 0.875rem; color: #374151; font-family: monospace; background: #f3f4f6; padding: 0.75rem; border-radius: 0.375rem;">
-      <div style="margin-bottom: 0.5rem;"><strong>Substituting values:</strong></div>
-      <div style="color: #4b5563;">
-        F = <span style="color: #00bbff; font-weight: 600;">${params.spotRate.toFixed(4)}</span> × e<sup>(<span style="color: #ea792d; font-weight: 600;">${rf}</span> − <span style="color: #7a46ff; font-weight: 600;">${rd}</span>)</sup>
-      </div>
-      <div style="margin-top: 0.5rem; color: #50037f; font-weight: 700; font-size: 1rem;">
-        = ${calc.forwardRate.toFixed(4)}
-      </div>
-    </div>
-    
-    <div style="text-align: center; margin-top: 1rem; font-size: 0.8125rem; color: #6b7280;">
-      <div><strong>Where:</strong></div>
-      <div style="margin-top: 0.25rem;">
-        <span style="color: #00bbff; font-weight: 600;">S = ${params.spotRate.toFixed(4)}</span> (spot rate),
-        <span style="color: #ea792d; font-weight: 600;">r<sub>f</sub> = ${formatPercentage(params.foreignRate)}</span>,
-        <span style="color: #7a46ff; font-weight: 600;">r<sub>d</sub> = ${formatPercentage(params.domesticRate)}</span>
-      </div>
+  const mathJax = `
+    <div style="text-align: center;">
+      $$\\color{#50037f}{F_{0,f/d}} = \\color{#0079a6}{${params.spotRate.toFixed(4)}} \\times e^{(\\color{#ea792d}{${rf}} - \\color{#7a46ff}{${rd}})} = \\color{#50037f}{${calc.forwardRate.toFixed(4)}}$$
     </div>
   `;
   
-  container.innerHTML = mathML;
+  container.innerHTML = mathJax;
+  
+  // Typeset the new MathJax content and fix accessibility
+  if (window.MathJax) {
+    window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub, container], function() {
+      // Remove tabindex and add role after typesetting
+      const spans = container.querySelectorAll('.MathJax');
+      spans.forEach(function(span) {
+        span.setAttribute('role', 'math');
+        span.removeAttribute('tabindex');
+      });
+    });
+  }
 }
 
 function renderTable(calc, params) {
@@ -230,6 +276,9 @@ function renderChart(calc, params) {
     window.exchangeChart.destroy();
   }
   
+  // Register the datalabels plugin
+  Chart.register(ChartDataLabels);
+  
   const minRate = Math.min(params.domesticRate, params.foreignRate);
   const maxRate = Math.max(params.domesticRate, params.foreignRate);
   const ratePadding = Math.max((maxRate - minRate) * 0.5, 0.5);
@@ -246,11 +295,28 @@ function renderChart(calc, params) {
         {
           label: 'Exchange Rate',
           data: [params.spotRate, calc.forwardRate],
-          backgroundColor: ['#00bbff', '#50037f'],
-          borderColor: ['#06005a', '#06005a'],
-          borderWidth: 2,
+          backgroundColor: ['#0079a6', '#50037f'],
+          borderColor: 'transparent',
+          borderWidth: 0,
           yAxisID: 'y-exchange',
-          order: 2
+          order: 2,
+          datalabels: {
+            anchor: 'center',
+            align: 'center',
+            formatter: (value, context) => {
+              const label = context.dataIndex === 0 ? 'Spot' : 'Forward';
+              return label + '\n' + value.toFixed(4);
+            },
+            color: '#ffffff',
+            font: {
+              weight: 'bold',
+              size: 13,
+              lineHeight: 1.4
+            },
+            textStrokeColor: 'rgba(0,0,0,0.3)',
+            textStrokeWidth: 1,
+            padding: 0
+          }
         },
         {
           label: 'Domestic Rate',
@@ -261,7 +327,27 @@ function renderChart(calc, params) {
           borderWidth: 3,
           pointRadius: 6,
           yAxisID: 'y-rate',
-          order: 1
+          order: 1,
+          datalabels: {
+            display: function(context) {
+              // Only show on first point
+              return context.dataIndex === 0;
+            },
+            anchor: 'end',
+            align: 'end',
+            offset: 10,
+            formatter: (value) => 'Domestic: ' + value.toFixed(2) + '%',
+            color: '#5a20cc',  // Darker purple for WCAG compliance
+            font: {
+              weight: 'bold',
+              size: 12
+            },
+            backgroundColor: '#ffffff',
+            borderColor: '#7a46ff',
+            borderWidth: 2,
+            borderRadius: 4,
+            padding: 8
+          }
         },
         {
           label: 'Foreign Rate',
@@ -272,7 +358,26 @@ function renderChart(calc, params) {
           borderWidth: 3,
           pointRadius: 6,
           yAxisID: 'y-rate',
-          order: 1
+          order: 1,
+          datalabels: {
+            display: function(context) {
+              return context.dataIndex === 1;  // Show on second point
+            },
+            anchor: 'start',
+            align: 'start',
+            offset: 10,
+            formatter: (value) => 'Foreign: ' + value.toFixed(2) + '%',
+            color: '#a84f15',  // Darker orange for WCAG compliance
+            font: {
+              weight: 'bold',
+              size: 12
+            },
+            backgroundColor: '#ffffff',
+            borderColor: '#ea792d',
+            borderWidth: 2,
+            borderRadius: 4,
+            padding: 8
+          }
         }
       ]
     },
@@ -351,8 +456,8 @@ function runSelfTests() {
   const tests = [
     {
       name: 'Forward exchange calculation',
-      inputs: { spotRate: 1.2602, domesticRate: 2.360, foreignRate: 2.430 },
-      expected: { forwardApprox: 1.2611 }
+      inputs: { spotRate: 1.26, domesticRate: 2.5, foreignRate: 3.0 },
+      expected: { forwardApprox: 1.2663 }
     }
   ];
   

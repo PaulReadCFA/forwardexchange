@@ -1,34 +1,42 @@
 /* Forward Exchange Rate Calculator Specific Styles */
 :root {
-  --color-spot-rate: #00bbff;              /* Cyan - spot rate */
+  --color-spot-rate: #0079a6;              /* CFA Teal - spot rate */
   --color-forward-rate: #50037f;           /* Deep purple - forward rate */
   --color-domestic-rate: #7a46ff;          /* Purple - domestic rate */
+  --color-domestic-rate-dark: #5a20cc;     /* Darker purple - WCAG AA compliant text */
   --color-foreign-rate: #ea792d;           /* Orange - foreign rate */
+  --color-foreign-rate-dark: #a84f15;      /* Darker orange - WCAG AA compliant text */
 }
 
+/* Result boxes */
 .result-box.forward-exchange {
-  background-color: var(--color-bg-blue);
-  border-color: var(--color-blue-interactive);
+  background-color: var(--color-bg-purple);
+  border-color: var(--color-forward-rate);
 }
 
 .result-box.domestic-strategy {
-  background-color: var(--color-bg-green);
-  border-color: var(--color-green-data);
+  background-color: var(--color-bg-purple);
+  border-color: var(--color-domestic-rate);
 }
 
 .result-box.foreign-strategy {
-  background-color: var(--color-bg-purple);
-  border-color: var(--color-purple-bold);
+  background-color: var(--color-bg-orange);
+  border-color: var(--color-foreign-rate);
 }
 
+/* Ensure all result titles are the same size */
+.result-title,
 .result-title.forward-exchange {
   font-size: 1.125rem;
   font-weight: 600;
-  color: var(--color-blue-interactive);
+}
+
+.result-title.forward-exchange {
+  color: var(--color-forward-rate);
 }
 
 .result-value {
-  color: var(--color-blue-interactive);
+  color: var(--color-forward-rate);
   word-wrap: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
@@ -36,10 +44,11 @@
 
 .strategy-details {
   font-size: 0.8125rem;
-  color: var(--color-gray-700);
+  color: #1f2937;
   line-height: 1.5;
 }
 
+/* Input styling */
 .input-group-inline {
   display: flex;
   flex-wrap: wrap;
@@ -112,6 +121,16 @@
   }
 }
 
+/* MathJax equation styling */
+.mathjax-equation {
+  text-align: center;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
 .equation-container {
   padding: 1rem;
   margin: 0.75rem 0;
@@ -122,25 +141,30 @@
   max-width: 100%;
 }
 
-math {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--color-gray-800);
-}
-
-#dynamic-equation-container math {
-  font-size: 1rem;
-  color: var(--color-gray-700);
-}
-
+/* Responsive equation scaling */
 @media (max-width: 768px) {
-  .equation-container math {
+  .mathjax-equation {
     font-size: 0.95em;
+  }
+  .equation-container {
+    padding: 0.75rem;
   }
 }
 
 @media (max-width: 640px) {
-  .equation-container math {
+  .mathjax-equation {
     font-size: 0.85em;
+  }
+  .equation-container {
+    padding: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mathjax-equation {
+    font-size: 0.75em;
+  }
+  .equation-container {
+    padding: 0.25rem;
   }
 }

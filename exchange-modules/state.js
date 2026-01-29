@@ -1,7 +1,7 @@
 export const state = {
-  spotRate: 1.2602,
-  domesticRate: 2.360,
-  foreignRate: 2.430,
+  spotRate: 1.26,
+  domesticRate: 2.5,
+  foreignRate: 3.0,
   errors: {},
   exchangeCalculations: null,
   listeners: []
