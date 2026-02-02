@@ -196,10 +196,6 @@ function renderResults(calc, params) {
   const container = $('#results-content');
   if (!container) return;
   
-  const arbitrageNote = calc.noArbitrage 
-    ? '<div style="margin-top: 1rem; padding: 0.75rem; background: #f0fdf4; border-left: 3px solid #15803d; border-radius: 0.375rem; font-size: 0.8125rem; color: #15803d;"><strong>✓ No Arbitrage:</strong> The domestic and foreign investments yield the same result, confirming the forward rate eliminates arbitrage opportunities.</div>'
-    : `<div style="margin-top: 1rem; padding: 0.75rem; background: #fef2f2; border-left: 3px solid #b91c1c; border-radius: 0.375rem; font-size: 0.8125rem; color: #b91c1c;"><strong>⚠ Arbitrage Opportunity:</strong> The domestic investment (${formatCurrency(calc.domesticEndingValue)}) and foreign investment (${formatCurrency(calc.domesticEquivalent)}) differ by ${formatCurrency(calc.arbitrageDiff)}, indicating a potential arbitrage opportunity.</div>`;
-  
   container.innerHTML = `
     <div class="result-box forward-exchange">
       <h5 class="result-title forward-exchange">Implied Forward Exchange Rate Result</h5>
@@ -228,8 +224,6 @@ function renderResults(calc, params) {
         </div>
       </div>
     </div>
-    
-    ${arbitrageNote}
   `;
 }
 
