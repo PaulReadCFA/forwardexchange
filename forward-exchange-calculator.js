@@ -29,16 +29,33 @@ function init() {
 
 function setupSkipLinks() {
   // Handle "Skip to data table" link
-  const skipToTableLink = document.querySelector('a[href="#show-table"]');
+  const skipToTableLink = document.querySelector('a[href="#table-view"]');
   if (skipToTableLink) {
     listen(skipToTableLink, 'click', (e) => {
       e.preventDefault();
+      console.log('Skip to table clicked');
+      
+      // Get the Table button
       const tableBtn = $('#view-table-btn');
+      
       if (tableBtn) {
-        // Switch to table view
-        switchToTableView();
-        // Focus the table button
-        setTimeout(() => tableBtn.focus(), 100);
+        // If table view is already showing, just focus the button
+        if (tableBtn.classList.contains('active')) {
+          tableBtn.focus();
+          const tableView = $('#table-view');
+          if (tableView) {
+            tableView.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        } else {
+          // Click the Table button to switch view
+          tableBtn.click();
+          
+          // Focus the button after a brief delay
+          setTimeout(() => {
+            tableBtn.focus();
+            console.log('Table button focused, active element:', document.activeElement.id);
+          }, 100);
+        }
       }
     });
   }
@@ -120,17 +137,22 @@ function setupViewToggle() {
 
 function setupInputListeners() {
   const inputs = [
-    { id: 'spot-rate', field: 'spotRate' },
-    { id: 'domestic-rate', field: 'domesticRate' },
-    { id: 'foreign-rate', field: 'foreignRate' }
+    { id: 'spot-rate', field: 'spotRate', decimals: 2 },
+    { id: 'domestic-rate', field: 'domesticRate', decimals: 1 },
+    { id: 'foreign-rate', field: 'foreignRate', decimals: 1 }
   ];
   
-  inputs.forEach(({ id, field }) => {
+  inputs.forEach(({ id, field, decimals }) => {
     const input = $(`#${id}`);
     if (!input) return;
     
     const debouncedUpdate = debounce(() => {
-      const value = parseFloat(input.value);
+      let value = parseFloat(input.value);
+      // Round to prevent floating point precision issues
+      value = Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals);
+      // Force display with correct decimal places
+      input.value = value.toFixed(decimals);
+      
       const error = validateField(field, value);
       updateFieldError(id, error);
       const errors = { ...state.errors };
@@ -174,9 +196,13 @@ function renderResults(calc, params) {
   const container = $('#results-content');
   if (!container) return;
   
+  const arbitrageNote = calc.noArbitrage 
+    ? '<div style="margin-top: 1rem; padding: 0.75rem; background: #f0fdf4; border-left: 3px solid #15803d; border-radius: 0.375rem; font-size: 0.8125rem; color: #15803d;"><strong>✓ No Arbitrage:</strong> The domestic and foreign investments yield the same result, confirming the forward rate eliminates arbitrage opportunities.</div>'
+    : `<div style="margin-top: 1rem; padding: 0.75rem; background: #fef2f2; border-left: 3px solid #b91c1c; border-radius: 0.375rem; font-size: 0.8125rem; color: #b91c1c;"><strong>⚠ Arbitrage Opportunity:</strong> The domestic investment (${formatCurrency(calc.domesticEndingValue)}) and foreign investment (${formatCurrency(calc.domesticEquivalent)}) differ by ${formatCurrency(calc.arbitrageDiff)}, indicating a potential arbitrage opportunity.</div>`;
+  
   container.innerHTML = `
     <div class="result-box forward-exchange">
-      <h5 class="result-title forward-exchange">Forward Exchange Rate Result</h5>
+      <h5 class="result-title forward-exchange">Implied Forward Exchange Rate Result</h5>
       <div class="result-value" style="color: #50037f;" aria-live="polite">${calc.forwardRate.toFixed(4)}</div>
     </div>
     
@@ -191,7 +217,7 @@ function renderResults(calc, params) {
     </div>
     
     <div class="result-box foreign-strategy">
-      <h5 class="result-title" style="color: #a84f15;">Foreign Investment Strategy</h5>
+      <h5 class="result-title" style="color: #8b4513;">Foreign Investment Strategy</h5>
       <div class="strategy-details">
         <div style="color: #1f2937;">Convert → invest at ${formatPercentage(params.foreignRate)} → convert back</div>
         <div style="font-size: 0.75rem; color: #4b5563; margin-top: 0.25rem;">
@@ -202,6 +228,8 @@ function renderResults(calc, params) {
         </div>
       </div>
     </div>
+    
+    ${arbitrageNote}
   `;
 }
 
@@ -240,28 +268,26 @@ function renderTable(calc, params) {
   tableBody.innerHTML = `
     <tr>
       <th scope="row">Exchange Rate</th>
-      <td>${params.spotRate.toFixed(4)}</td>
-      <td>${calc.forwardRate.toFixed(4)}</td>
+      <td><span style="color: #0079a6; font-weight: 600;">S:</span> ${params.spotRate.toFixed(4)}</td>
+      <td><span style="color: #50037f; font-weight: 600;">F:</span> ${calc.forwardRate.toFixed(4)}</td>
     </tr>
     <tr>
       <th scope="row">Domestic Rate</th>
-      <td>${formatPercentage(params.domesticRate)}</td>
-      <td>${formatPercentage(params.domesticRate)}</td>
+      <td colspan="2"><span style="color: #5a20cc; font-weight: 600;">r<sub>d</sub>:</span> ${formatPercentage(params.domesticRate)}</td>
     </tr>
     <tr>
       <th scope="row">Foreign Rate</th>
-      <td>${formatPercentage(params.foreignRate)}</td>
-      <td>${formatPercentage(params.foreignRate)}</td>
+      <td colspan="2"><span style="color: #8b4513; font-weight: 600;">r<sub>f</sub>:</span> ${formatPercentage(params.foreignRate)}</td>
     </tr>
     <tr>
-      <th scope="row">Domestic Investment</th>
-      <td>USD 1,000</td>
-      <td>${formatCurrency(calc.domesticEndingValue)}</td>
+      <th scope="row">Domestic Investment (USD)</th>
+      <td>1,000.00</td>
+      <td>${formatCurrency(calc.domesticEndingValue, false, false)}</td>
     </tr>
     <tr>
-      <th scope="row">Foreign Investment (converted)</th>
-      <td>USD 1,000</td>
-      <td>${formatCurrency(calc.domesticEquivalent)}</td>
+      <th scope="row">Foreign Investment (USD)</th>
+      <td>1,000.00</td>
+      <td>${formatCurrency(calc.domesticEquivalent, false, false)}</td>
     </tr>
   `;
 }
@@ -276,8 +302,57 @@ function renderChart(calc, params) {
     window.exchangeChart.destroy();
   }
   
-  // Register the datalabels plugin
-  Chart.register(ChartDataLabels);
+  // Register ChartDataLabels plugin for lines only
+  if (window.ChartDataLabels && !Chart.registry.plugins.get('datalabels')) {
+    Chart.register(window.ChartDataLabels);
+    console.log('ChartDataLabels plugin registered successfully');
+  } else if (!window.ChartDataLabels) {
+    console.error('ChartDataLabels plugin not loaded from CDN');
+  } else {
+    console.log('ChartDataLabels already registered');
+  }
+  
+  // Custom plugin to draw bar labels manually
+  const barLabelsPlugin = {
+    id: 'customBarLabels',
+    afterDatasetsDraw(chart) {
+      const ctx = chart.ctx;
+      const dataset = chart.data.datasets[0]; // Bar dataset
+      const meta = chart.getDatasetMeta(0);
+      
+      // Debug: log chart dimensions and bar coordinates
+      console.log('Chart area:', chart.chartArea);
+      console.log('Canvas dimensions:', chart.canvas.width, 'x', chart.canvas.height);
+      console.log('Bar coordinates:', meta.data.map(b => ({x: b.x, y: b.y, base: b.base})));
+      
+      ctx.save();
+      ctx.font = 'bold 14px Arial';
+      ctx.fillStyle = 'white';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      meta.data.forEach((bar, index) => {
+        const value = dataset.data[index];
+        const label = index === 0 ? 'Spot' : 'Forward';
+        
+        // Use chartArea to position within visible area
+        const chartTop = chart.chartArea.top;
+        const chartBottom = chart.chartArea.bottom;
+        const visibleHeight = chartBottom - chartTop;
+        
+        // Position in lower third of visible chart area
+        const labelY = chartBottom - (visibleHeight * 0.25);
+        
+        console.log('Drawing label at:', bar.x, labelY, 'for bar', index);
+        
+        // Draw label and value
+        ctx.fillText(label, bar.x, labelY - 10);
+        ctx.fillText(value.toFixed(4), bar.x, labelY + 10);
+      });
+      
+      ctx.restore();
+    }
+  };
   
   const minRate = Math.min(params.domesticRate, params.foreignRate);
   const maxRate = Math.max(params.domesticRate, params.foreignRate);
@@ -301,21 +376,7 @@ function renderChart(calc, params) {
           yAxisID: 'y-exchange',
           order: 2,
           datalabels: {
-            anchor: 'center',
-            align: 'center',
-            formatter: (value, context) => {
-              const label = context.dataIndex === 0 ? 'Spot' : 'Forward';
-              return label + '\n' + value.toFixed(4);
-            },
-            color: '#ffffff',
-            font: {
-              weight: 'bold',
-              size: 13,
-              lineHeight: 1.4
-            },
-            textStrokeColor: 'rgba(0,0,0,0.3)',
-            textStrokeWidth: 1,
-            padding: 0
+            display: false  // Disable ChartDataLabels for bars
           }
         },
         {
@@ -367,7 +428,7 @@ function renderChart(calc, params) {
             align: 'start',
             offset: 10,
             formatter: (value) => 'Foreign: ' + value.toFixed(2) + '%',
-            color: '#a84f15',  // Darker orange for WCAG compliance
+            color: '#8b4513',  // Darker orange (saddle brown) for WCAG compliance
             font: {
               weight: 'bold',
               size: 12
@@ -381,11 +442,16 @@ function renderChart(calc, params) {
         }
       ]
     },
+    plugins: [barLabelsPlugin],  // Register our custom plugin
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
+        datalabels: {
+          // Default: disable for all datasets
+          display: false
+        },
         tooltip: {
           callbacks: {
             label: (context) => {
@@ -411,7 +477,7 @@ function renderChart(calc, params) {
           position: 'left',
           title: { 
             display: true, 
-            text: 'Exchange Rate',
+            text: 'Exchange rate',
             color: '#374151',
             font: { weight: 600 }
           },
@@ -430,7 +496,7 @@ function renderChart(calc, params) {
           position: 'right',
           title: { 
             display: true, 
-            text: 'Interest Rate (%)',
+            text: 'Interest rate (%)',
             color: '#374151',
             font: { weight: 600 }
           },
@@ -449,6 +515,14 @@ function renderChart(calc, params) {
       }
     }
   });
+  
+  // Debug: Log chart configuration
+  console.log('Chart created with custom bar labels plugin');
+  console.log('Bar dataset:', window.exchangeChart.data.datasets[0]);
+  console.log('Custom plugin registered:', window.exchangeChart.config.plugins.length > 0);
+  
+  // Force update to trigger render
+  window.exchangeChart.update('active');
 }
 
 function runSelfTests() {
@@ -456,8 +530,8 @@ function runSelfTests() {
   const tests = [
     {
       name: 'Forward exchange calculation',
-      inputs: { spotRate: 1.26, domesticRate: 2.5, foreignRate: 3.0 },
-      expected: { forwardApprox: 1.2663 }
+      inputs: { spotRate: 1.25, domesticRate: 2.5, foreignRate: 3.0 },
+      expected: { forwardApprox: 1.2563 }
     }
   ];
   

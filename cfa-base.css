@@ -194,7 +194,8 @@ body {
 /* Focus rings for keyboard navigation */
 section[tabindex]:focus,
 table[tabindex]:focus,
-canvas[tabindex]:focus {
+canvas[tabindex]:focus,
+#table-view:focus {
   outline: 2px solid var(--color-blue-interactive);
   outline-offset: 4px;
   border-radius: 0.25rem;

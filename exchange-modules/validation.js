@@ -2,7 +2,7 @@ import { $ } from './utils.js';
 
 const VALIDATION_RULES = {
   spotRate: {
-    min: 0.0001,
+    min: 0.1,
     max: 10,
     required: true,
     label: 'Spot exchange rate'

@@ -4,8 +4,8 @@
   --color-forward-rate: #50037f;           /* Deep purple - forward rate */
   --color-domestic-rate: #7a46ff;          /* Purple - domestic rate */
   --color-domestic-rate-dark: #5a20cc;     /* Darker purple - WCAG AA compliant text */
-  --color-foreign-rate: #ea792d;           /* Orange - foreign rate */
-  --color-foreign-rate-dark: #a84f15;      /* Darker orange - WCAG AA compliant text */
+  --color-foreign-rate: #ea792d;           /* Orange - foreign rate line */
+  --color-foreign-rate-dark: #8b4513;      /* Darker orange (saddle brown) - WCAG AA compliant text */
 }
 
 /* Result boxes */
