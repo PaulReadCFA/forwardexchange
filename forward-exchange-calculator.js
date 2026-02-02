@@ -483,6 +483,7 @@ function renderChart(calc, params) {
             font: { weight: 500 }
           },
           grid: {
+            drawOnChartArea: false,  // Don't draw grid for exchange rate
             color: '#e5e7eb'
           }
         },
@@ -502,8 +503,7 @@ function renderChart(calc, params) {
             font: { weight: 500 }
           },
           grid: {
-            drawOnChartArea: false,
-            color: '#e5e7eb'
+            color: '#e5e7eb'  // Draw grid for interest rate
           }
         }
       }
