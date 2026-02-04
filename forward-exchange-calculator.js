@@ -206,7 +206,7 @@ function renderResults(calc, params) {
       <h5 class="result-title" style="color: #5a20cc;">Domestic Investment Strategy</h5>
       <div class="strategy-details">
         <div style="color: #1f2937;">Invest USD 1,000 at ${formatPercentage(params.domesticRate)}</div>
-        <div style="font-weight: 600; padding-top: 0.5rem; border-top: 1px solid #e9d5ff; margin-top: 0.5rem; color: #1f2937;">
+        <div style="font-weight: 600; padding-top: 0.5rem; border-top: 1px solid #e9d5ff; margin-top: 0.5rem; color: #1f2937;" aria-live="polite">
           Final: ${formatCurrency(calc.domesticEndingValue)}
         </div>
       </div>
@@ -219,7 +219,7 @@ function renderResults(calc, params) {
         <div style="font-size: 0.75rem; color: #4b5563; margin-top: 0.25rem;">
           Foreign: ${calc.foreignCurrencyAmount.toFixed(2)} @ ${formatPercentage(params.foreignRate)} = ${calc.foreignEndingValue.toFixed(2)}
         </div>
-        <div style="font-weight: 600; padding-top: 0.5rem; border-top: 1px solid #fed7aa; margin-top: 0.5rem; color: #1f2937;">
+        <div style="font-weight: 600; padding-top: 0.5rem; border-top: 1px solid #fed7aa; margin-top: 0.5rem; color: #1f2937;" aria-live="polite">
           Final: ${formatCurrency(calc.domesticEquivalent)}
         </div>
       </div>
@@ -229,10 +229,16 @@ function renderResults(calc, params) {
 
 function renderDynamicEquation(calc, params) {
   const container = $('#dynamic-mathml-equation');
+  const srDescription = $('#equation-sr-description');
   if (!container) return;
   
   const rd = (params.domesticRate / 100).toFixed(3);
   const rf = (params.foreignRate / 100).toFixed(3);
+  
+  // Update screen reader description
+  if (srDescription) {
+    srDescription.textContent = `Forward rate calculation: Forward rate equals spot rate ${params.spotRate.toFixed(4)} times e to the power of foreign rate ${params.foreignRate.toFixed(2)} percent minus domestic rate ${params.domesticRate.toFixed(2)} percent, which equals ${calc.forwardRate.toFixed(4)}`;
+  }
   
   const mathJax = `
     <div style="text-align: center;">
