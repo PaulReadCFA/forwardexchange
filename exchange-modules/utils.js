@@ -56,9 +56,9 @@ export function formatCurrency(value, signed = false, includeSymbol = true) {
   }
   
   if (value < 0) {
-    return signed ? `-USD ${formatted}` : `(USD ${formatted})`;
+    return signed ? `-USD${formatted}` : `(USD${formatted})`;
   }
-  return `USD ${formatted}`;
+  return `USD${formatted}`;
 }
 
 /**
