@@ -1,30 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Implied Forward Exchange Rate — Static Equation</title>
-
-  <!-- Google Fonts: Lato -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- MathJax -->
-  <script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-      menuSettings: { inTabOrder: false },
-      "HTML-CSS": { mtextFontInherit: true }
-    });
-  </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Implied Forward Exchange Rate Static Equation | CFA Institute</title>
 
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
 
     body {
-      font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: white;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -36,24 +30,117 @@
       width: 100%;
       max-width: 40rem;
       padding: 1.5rem 1rem;
-      background: white;
+      background: #ffffff;
       border: 1px solid #e5e7eb;
       border-radius: 0.5rem;
       text-align: center;
       overflow-x: auto;
+      overflow-y: hidden;
       -webkit-overflow-scrolling: touch;
     }
 
+    math {
+      display: inline-block;
+      font-family: "STIX Two Math", "Cambria Math", "Latin Modern Math", serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      min-width: max-content;
+    }
+
+    @media (max-width: 640px) {
+      math { font-size: 1.05rem; }
+    }
+
+    @media (max-width: 480px) {
+      math { font-size: 0.95rem; }
+    }
+
     @media (prefers-reduced-motion: reduce) {
-      * { transition: none !important; animation: none !important; }
+      *, *::before, *::after {
+        transition: none !important;
+        animation: none !important;
+      }
     }
   </style>
+
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      MathML: {
+        extensions: ["content-mathml.js"]
+      },
+      "HTML-CSS": {
+        scale: 100,
+        linebreaks: { automatic: true }
+      },
+      showProcessingMessages: false,
+      messageStyle: "none",
+      skipStartupTypeset: false
+    });
+
+    function removeMathJaxTabindex() {
+      document.querySelectorAll(".MathJax, .MathJax_Display, [id^='MathJax-']").forEach(function (el) {
+        el.removeAttribute("tabindex");
+      });
+    }
+
+    MathJax.Hub.Register.StartupHook("End", function () {
+      removeMathJaxTabindex();
+      setTimeout(removeMathJaxTabindex, 100);
+      setTimeout(removeMathJaxTabindex, 500);
+    });
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=MML_HTMLorMML"></script>
 </head>
+
 <body>
-  <div class="equation-container" role="region" aria-label="Implied forward exchange rate formula">
-    <div style="font-size: 1.25rem; padding: 0.5rem;">
-      $$\color{#50037f}{F_{0,f/d}} = \color{#0079a6}{S_{0,f/d}} \times e^{(\color{#ea792d}{r_f} - \color{#7a46ff}{r_d})}$$
-    </div>
+  <div class="equation-container">
+    <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+      <mrow>
+        <msub>
+          <mi mathcolor="#50037f">F</mi>
+          <mrow>
+            <mn>0</mn>
+            <mo>,</mo>
+            <mrow>
+              <mi>f</mi>
+              <mo>/</mo>
+              <mi>d</mi>
+            </mrow>
+          </mrow>
+        </msub>
+        <mo>=</mo>
+        <msub>
+          <mi mathcolor="#0079a6">S</mi>
+          <mrow>
+            <mn>0</mn>
+            <mo>,</mo>
+            <mrow>
+              <mi>f</mi>
+              <mo>/</mo>
+              <mi>d</mi>
+            </mrow>
+          </mrow>
+        </msub>
+        <mo>&times;</mo>
+        <msup>
+          <mi>e</mi>
+          <mrow>
+            <mo>(</mo>
+            <msub>
+              <mi mathcolor="#ea792d">r</mi>
+              <mi>f</mi>
+            </msub>
+            <mo>&minus;</mo>
+            <msub>
+              <mi mathcolor="#7a46ff">r</mi>
+              <mi>d</mi>
+            </msub>
+            <mo>)</mo>
+          </mrow>
+        </msup>
+      </mrow>
+    </math>
   </div>
 </body>
 </html>

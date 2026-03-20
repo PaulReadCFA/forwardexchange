@@ -253,7 +253,18 @@ function renderDynamicEquation(calc, params) {
         span.setAttribute('role', 'math');
         span.removeAttribute('tabindex');
       });
-      // Release fixed height then reveal — equation is fully rendered
+      // Update section aria-label so SR users hear the result on first load
+      // and after every recalculation — no input change needed
+      const equationCard = $('#equation-card');
+      if (equationCard) {
+        equationCard.setAttribute('aria-label',
+          `Implied forward exchange rate equation. ` +
+          `Forward rate equals spot rate ${params.spotRate.toFixed(4)} ` +
+          `times e to the power of foreign rate ${rf} minus domestic rate ${rd}. ` +
+          `Result: ${calc.forwardRate.toFixed(4)}`
+        );
+      }
+      // Release fixed height then reveal
       container.style.height = '';
       container.style.visibility = 'visible';
     });

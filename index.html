@@ -62,7 +62,7 @@
         <h2 class="card-title">Implied Forward Exchange Rate Calculator</h2>
         <div class="card-content">
           <p style="margin-bottom: 1.25rem; color: #4b5563; font-size: 0.9375rem; line-height: 1.6;">
-            Enter your exchange and interest below. The forward exchange rate calculation and visualizations will update automatically as you change the values.
+            Enter your exchange and interest rates below. The forward exchange rate calculation and visualizations will update automatically as you change the values.
           </p>
           
           <div class="input-section">
@@ -117,7 +117,7 @@
       </section>
 
       <!-- Card 2: Dynamic Equation -->
-      <section id="equation-card" class="card">
+      <section id="equation-card" class="card" aria-label="Implied forward exchange rate equation">
         <h2 class="card-title">Implied Forward Exchange Rate Equation</h2>
         <div class="equation-container" role="region" aria-label="Forward exchange rate calculation with your values" id="dynamic-equation-container" style="min-height: 120px;">
           <p class="sr-only" id="equation-sr-description"></p>
@@ -167,7 +167,7 @@
               </div>
             </section>
 
-            <div class="sr-only" id="exchange-chart-desc">
+            <div class="sr-only" id="exchange-chart-desc" hidden>
               <h3 id="exchange-chart-title">Forward exchange rate analysis chart</h3>
               <p>
                 This chart shows the spot exchange rate at t&thinsp;=&thinsp;0 and the implied forward rate at t&thinsp;=&thinsp;1 as bars, with domestic and foreign interest rates as horizontal lines between them.
@@ -177,13 +177,9 @@
             </div>
 
             <div id="chart-container" class="chart-wrapper"
-                 role="img"
-                 aria-labelledby="exchange-chart-title"
-                 aria-describedby="exchange-chart-desc"
+                 aria-hidden="true"
                  style="height: 28rem;">
-              <canvas id="exchange-chart"
-                tabindex="0"
-                aria-label="Exchange rate chart. All data is available in the Table view — activate the Table button above."></canvas>
+              <canvas id="exchange-chart"></canvas>
             </div>
           </div>
 
