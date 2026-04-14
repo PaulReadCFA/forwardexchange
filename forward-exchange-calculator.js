@@ -1,7 +1,16 @@
 import { state, setState, subscribe } from './exchange-modules/state.js';
 import { calculateExchangeMetrics } from './exchange-modules/calculations.js';
 import { validateField, updateFieldError, updateValidationSummary, hasErrors } from './exchange-modules/validation.js';
-import { $, listen, debounce, formatCurrency, formatPercentage, announceToScreenReader } from './exchange-modules/utils.js';
+import {
+  $,
+  listen,
+  debounce,
+  formatCurrency,
+  formatPercentage,
+  announceToScreenReader,
+  clampNumericInputLength,
+  NUMERIC_INPUT_MAX_CHARS
+} from './exchange-modules/utils.js';
 
 function init() {
   setupInputListeners();
@@ -152,8 +161,12 @@ function setupInputListeners() {
       if (!hasErrors(errors)) updateCalculations();
     }, 300);
     
-    listen(input, 'input', debouncedUpdate);
-    listen(input, 'change', debouncedUpdate);
+    const onInput = () => {
+      clampNumericInputLength(input, NUMERIC_INPUT_MAX_CHARS);
+      debouncedUpdate();
+    };
+    listen(input, 'input', onInput);
+    listen(input, 'change', onInput);
   });
 }
 
@@ -339,12 +352,55 @@ function renderChart(calc, params) {
   const maxEx = Math.max(params.spotRate, calc.forwardRate);
   const exPadding = Math.max((maxEx - minEx) * 0.5, 0.15);
 
-  // Round axis maxima up to a clean number so the top tick is never a strange decimal
+  /** Pick a human-friendly tick step from the padded span (~targetTicks divisions). */
+  function pickNiceStep(span, targetTicks = 6) {
+    if (!Number.isFinite(span) || span <= 0) return 0.05;
+    const raw = span / targetTicks;
+    const pow10 = Math.pow(10, Math.floor(Math.log10(raw)));
+    const err = raw / pow10;
+    let m = 1;
+    if (err <= 1) m = 1;
+    else if (err <= 2) m = 2;
+    else if (err <= 5) m = 5;
+    else m = 10;
+    return m * pow10;
+  }
+
   function niceMax(rawMax, step) {
     return Math.ceil(rawMax / step) * step;
   }
-  const exMax   = niceMax(maxEx   + exPadding,   0.05);
-  const rateMax = niceMax(maxRate + ratePadding,  0.5);
+
+  function niceMin(rawMin, step) {
+    return Math.floor(rawMin / step) * step;
+  }
+
+  function decimalsForStep(step) {
+    if (!Number.isFinite(step) || step <= 0) return 2;
+    return Math.min(4, Math.max(0, Math.ceil(-Math.log10(step))));
+  }
+
+  const exLo = Math.max(0, minEx - exPadding);
+  const exHi = maxEx + exPadding;
+  const exStep = pickNiceStep(exHi - exLo, 6);
+  const exMin = niceMin(exLo, exStep);
+  const exMax = niceMax(exHi, exStep);
+
+  const rateLo = minRate - ratePadding;
+  const rateHi = maxRate + ratePadding;
+  const rateStep = pickNiceStep(rateHi - rateLo, 6);
+  const rateMin = niceMin(rateLo, rateStep);
+  const rateMax = niceMax(rateHi, rateStep);
+
+  const exDecimals = decimalsForStep(exStep);
+  const rateDecimals = decimalsForStep(rateStep);
+
+  /** Label every tick value on the axis, but only print text on first / last / every second tick (Chart still draws each tick). */
+  function sparseRateTickLabel(value, index, ticks) {
+    const n = ticks.length;
+    const showText = index === 0 || index === n - 1 || index % 2 === 0;
+    if (!showText) return '';
+    return Number(value).toFixed(rateDecimals);
+  }
   
   // Custom plugin: draws rate lines exactly from the right edge of the spot bar
   // to the left edge of the forward bar, with labels at each end.
@@ -589,10 +645,12 @@ function renderChart(calc, params) {
             color: '#374151',
             font: { size: 13, weight: '600', family: systemFont }
           },
-          min: Math.max(0, minEx - exPadding),
+          min: exMin,
           max: exMax,
           ticks: {
-            callback: (v) => v.toFixed(2),
+            stepSize: exStep,
+            autoSkip: false,
+            callback: (v) => Number(v).toFixed(exDecimals),
             color: '#374151',
             font: { size: 13, weight: '600', family: systemFont }
           },
@@ -606,10 +664,12 @@ function renderChart(calc, params) {
             color: '#374151',
             font: { size: 13, weight: '600', family: systemFont }
           },
-          min: Math.max(0, minRate - ratePadding),
+          min: rateMin,
           max: rateMax,
           ticks: {
-            callback: (v) => v.toFixed(2),
+            stepSize: rateStep,
+            autoSkip: false,
+            callback: sparseRateTickLabel,
             color: '#374151',
             font: { size: 13, weight: '600', family: systemFont }
           },

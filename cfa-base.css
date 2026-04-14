@@ -193,9 +193,9 @@ body {
 }
 
 /* Focus rings for keyboard navigation */
-section[tabindex]:focus,
-table[tabindex]:focus,
-canvas[tabindex]:focus,
+section[tabindex]:focus-visible,
+table[tabindex]:focus-visible,
+canvas[tabindex]:focus-visible,
 #table-view:focus {
   outline: 2px solid var(--color-blue-interactive);
   outline-offset: 4px;
@@ -276,6 +276,7 @@ kbd {
   border-radius: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   padding: 1.25rem;
+  --card-padding-x: 1.25rem;
 }
 
 /* Sticky calculator card */
@@ -289,6 +290,7 @@ kbd {
 @media (min-width: 640px) {
   .card {
     padding: 1.5rem;
+    --card-padding-x: 1.5rem;
   }
 }
 
@@ -296,18 +298,21 @@ kbd {
 @media (max-width: 768px) {
   .card {
     padding: 1rem;
+    --card-padding-x: 1rem;
   }
 }
 
 @media (max-width: 400px) {
   .card {
     padding: 0.75rem;
+    --card-padding-x: 0.75rem;
   }
 }
 
 @media (max-width: 340px) {
   .card {
     padding: 0.5rem;
+    --card-padding-x: 0.5rem;
   }
 }
 
@@ -394,6 +399,8 @@ kbd {
   display: flex;
   gap: 0.5rem;
   flex-shrink: 0;
+  /* When legend/title wraps, keep toggles on the right (same as implied growth) */
+  margin-left: auto;
 }
 
 /* Base button styling */
@@ -439,21 +446,61 @@ kbd {
   cursor: not-allowed;
 }
 
-/* Responsive: Stack controls on mobile */
+/* Responsive: stack legend above toggles; Chart/Table pair stays right (WCAG 2.5.5: 44×44px). */
 @media (max-width: 640px) {
   .view-controls {
     flex-direction: column;
     align-items: stretch;
   }
-  
-  .button-group {
-    width: 100%;
+
+  .view-controls .button-group {
+    width: auto;
+    max-width: 100%;
+    align-self: flex-end;
+    justify-content: flex-end;
     margin-left: 0;
   }
-  
-  .button-group .toggle-btn,
-  .button-group .model-btn {
+
+  .view-controls .button-group .toggle-btn,
+  .view-controls .button-group .model-btn {
+    flex: 0 0 auto;
+  }
+
+  .card-header-with-controls .button-group {
+    width: auto;
+    max-width: 100%;
+    align-self: flex-end;
+    justify-content: flex-end;
+    margin-left: 0;
+  }
+
+  .card-header-with-controls .button-group .toggle-btn,
+  .card-header-with-controls .button-group .model-btn {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 380px) {
+  .view-controls .button-group {
+    align-self: stretch;
+    width: 100%;
+  }
+
+  .view-controls .button-group .toggle-btn,
+  .view-controls .button-group .model-btn {
     flex: 1;
+    min-width: 0;
+  }
+
+  .card-header-with-controls .button-group {
+    align-self: stretch;
+    width: 100%;
+  }
+
+  .card-header-with-controls .button-group .toggle-btn,
+  .card-header-with-controls .button-group .model-btn {
+    flex: 1;
+    min-width: 0;
   }
 }
 
@@ -717,7 +764,9 @@ kbd {
 }
 
 .equation-intro {
-  font-size: 0.875rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
   color: var(--color-gray-600);
   margin-bottom: 1rem;
   text-align: left;
@@ -768,9 +817,11 @@ kbd {
 }
 
 .result-title {
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .result-value {
@@ -882,7 +933,7 @@ kbd {
   text-align: center;
 }
 
-.equation-container:focus {
+.equation-container:focus-visible {
   outline: 2px solid var(--color-blue-interactive);
   outline-offset: 2px;
 }
@@ -1023,12 +1074,12 @@ math[display="block"] {
   width: 100%;
   height: 28rem;
   min-height: 400px;
-  border-radius: 0.5rem;
-  background: white;
-  border: 1px solid var(--color-gray-200);
+  border-radius: 0;
+  background: transparent;
+  border: none;
 }
 
-.chart-wrapper:focus {
+.chart-wrapper:focus-visible {
   outline: 2px solid var(--color-blue-interactive);
   outline-offset: 2px;
 }
@@ -1043,6 +1094,20 @@ math[display="block"] {
   .chart-wrapper {
     height: 24rem;
   }
+}
+
+/* Full-width chart: cancel horizontal card padding (inherits --card-padding-x from .card) */
+#visualizer #chart-container.chart-wrapper,
+#visualizer #chart-container .chart-wrapper,
+#visualization-card #chart-container.chart-wrapper {
+  margin-left: calc(-1 * var(--card-padding-x, 1.25rem));
+  margin-right: calc(-1 * var(--card-padding-x, 1.25rem));
+  width: calc(100% + 2 * var(--card-padding-x, 1.25rem));
+  max-width: none;
+  box-sizing: border-box;
+  border-radius: 0;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 /* Chart bar buttons for accessibility */
@@ -1198,7 +1263,7 @@ math[display="block"] {
   text-align: right;
 }
 
-.data-table:focus {
+.data-table:focus-visible {
   outline: 2px solid var(--color-blue-interactive);
   outline-offset: 2px;
 }
@@ -1681,7 +1746,10 @@ math[display="block"] {
   border-radius: 0.5rem;
   font-weight: 600;
   z-index: 10;
-  white-space: nowrap;
+  white-space: normal;
+  text-align: center;
+  max-width: min(22rem, calc(100% - 2rem));
+  box-sizing: border-box;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 

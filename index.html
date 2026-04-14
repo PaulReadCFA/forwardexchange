@@ -61,7 +61,7 @@
       <section class="card" id="calculator" tabindex="-1">
         <h2 class="card-title">Implied Forward Exchange Rate Calculator</h2>
         <div class="card-content">
-          <p style="margin-bottom: 1.25rem; color: #4b5563; font-size: 0.9375rem; line-height: 1.6;">
+          <p class="equation-intro">
             Enter your exchange and interest rates below. The forward exchange rate calculation and visualizations will update automatically as you change the values.
           </p>
           
@@ -69,6 +69,11 @@
             <p class="sr-only" id="inputHelp">
               Enter exchange and interest rates and the calculator updates results automatically.
             </p>
+
+            <div id="validation-summary" class="validation-summary" role="alert" aria-live="assertive" style="display: none;">
+              <div class="validation-title">Please correct the following:</div>
+              <ul id="validation-list"></ul>
+            </div>
 
             <div class="input-group-inline">
               <div class="input-inline">
@@ -107,11 +112,6 @@
                 </div>
               </div>
             </div>
-
-            <div id="validation-summary" class="validation-summary" role="alert" aria-live="assertive" style="display: none;">
-              <div class="validation-title">Please correct the following:</div>
-              <ul id="validation-list"></ul>
-            </div>
           </div>
         </div>
       </section>
@@ -119,6 +119,7 @@
       <!-- Card 2: Dynamic Equation -->
       <section id="equation-card" class="card" aria-label="Implied forward exchange rate equation">
         <h2 class="card-title">Implied Forward Exchange Rate Equation</h2>
+        <p class="equation-intro">Using your inputs, the equation becomes:</p>
         <div class="equation-container" role="region" aria-label="Forward exchange rate calculation with your values" id="dynamic-equation-container" style="min-height: 120px;">
           <p class="sr-only" id="equation-sr-description"></p>
           <div id="dynamic-mathml-equation" class="mathjax-equation">
@@ -150,19 +151,19 @@
               <div class="legend" id="chart-legend" role="list">
                 <span class="legend-item" role="listitem">
                   <span class="legend-color" style="background-color: #0079a6;" aria-hidden="true"></span>
-                  Spot rate <span style="color:#0079a6; font-weight:600;">(<em>S</em>)</span> (<em>t</em>&thinsp;=&thinsp;0)
+                  Spot rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#0079a6;"><em>S</em></span><span class="legend-paren">)</span></span> (<em>t</em>&thinsp;=&thinsp;0)
                 </span>
                 <span class="legend-item" role="listitem">
                   <span class="legend-color" style="background-color: #50037f;" aria-hidden="true"></span>
-                  Forward rate <span style="color:#50037f; font-weight:600;">(<em>F</em>)</span> (<em>t</em>&thinsp;=&thinsp;1)
+                  Forward rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#50037f;"><em>F</em></span><span class="legend-paren">)</span></span> (<em>t</em>&thinsp;=&thinsp;1)
                 </span>
                 <span class="legend-item" role="listitem">
                   <span class="legend-color" style="background-color: #7a46ff;" aria-hidden="true"></span>
-                  Domestic interest rate <span style="color:#5a20cc; font-weight:600;">(<em>r</em><sub><em>d</em></sub>)</span>
+                  Domestic interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#5a20cc;"><em>r</em><sub><em>d</em></sub></span><span class="legend-paren">)</span></span>
                 </span>
                 <span class="legend-item" role="listitem">
                   <span class="legend-color" style="background-color: #ea792d;" aria-hidden="true"></span>
-                  Foreign interest rate <span style="color:#8b4513; font-weight:600;">(<em>r</em><sub><em>f</em></sub>)</span>
+                  Foreign interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#8b4513;"><em>r</em><sub><em>f</em></sub></span><span class="legend-paren">)</span></span>
                 </span>
               </div>
             </section>

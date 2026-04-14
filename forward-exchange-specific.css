@@ -1,4 +1,27 @@
 /* Forward Exchange Rate Calculator Specific Styles */
+
+/* Chart legend: keep parentheses tight to coloured variables (italic sidebearings) */
+#chart-legend .legend-var-wrap {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0;
+  vertical-align: baseline;
+}
+
+#chart-legend .legend-paren {
+  color: var(--color-gray-700);
+  font-weight: inherit;
+}
+
+#chart-legend .legend-var {
+  font-weight: 600;
+  margin: 0 -0.06em;
+}
+
+#chart-legend .legend-var em {
+  font-style: italic;
+}
+
 :root {
   --color-spot-rate: #0079a6;              /* CFA Teal - spot rate */
   --color-forward-rate: #50037f;           /* Deep purple - forward rate */
@@ -27,8 +50,10 @@
 /* Ensure all result titles are the same size */
 .result-title,
 .result-title.forward-exchange {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 600;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .result-title.forward-exchange {
@@ -110,19 +135,42 @@
   cursor: not-allowed;
   pointer-events: none;
 }
+
+#calculator .input-section {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+#calculator .validation-summary {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .input-group-inline {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
   }
   .input-inline {
     width: 100%;
+    max-width: 100%;
+    flex-wrap: wrap;
+    white-space: normal;
+    align-items: flex-start;
+    box-sizing: border-box;
+  }
+  .input-label-inline {
+    flex: 1 1 100%;
+    max-width: 100%;
+    min-width: 0;
+    white-space: normal;
   }
   .input-with-suffix-inline {
     width: 100%;
-    max-width: 12rem;
-  }
-  .input-label-inline {
-    min-width: auto;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 }
 
