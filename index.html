@@ -130,8 +130,28 @@
 
       <!-- Card 3: Chart/Table Visualizer -->
       <section class="card" id="visualizer" tabindex="-1">
-        <div class="card-header-with-controls">
-          <h2 class="card-title">Implied Forward Exchange Rate Analysis</h2>
+        <h2 class="card-title">Implied Forward Exchange Rate Analysis</h2>
+        <div class="view-controls">
+          <section aria-label="Chart legend">
+            <div class="legend" id="chart-legend" role="list">
+              <span class="legend-item" role="listitem">
+                <span class="legend-color" style="background-color: #0079a6;" aria-hidden="true"></span>
+                Spot rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#0079a6;"><em>S</em></span><span class="legend-paren">)</span></span> (<em>t</em>&thinsp;=&thinsp;0)
+              </span>
+              <span class="legend-item" role="listitem">
+                <span class="legend-color" style="background-color: #50037f;" aria-hidden="true"></span>
+                Forward rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#50037f;"><em>F</em></span><span class="legend-paren">)</span></span> (<em>t</em>&thinsp;=&thinsp;1)
+              </span>
+              <span class="legend-item" role="listitem">
+                <span class="legend-color" style="background-color: #7a46ff;" aria-hidden="true"></span>
+                Domestic interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#5a20cc;"><em>r</em><sub><em>d</em></sub></span><span class="legend-paren">)</span></span>
+              </span>
+              <span class="legend-item" role="listitem">
+                <span class="legend-color" style="background-color: #ea792d;" aria-hidden="true"></span>
+                Foreign interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#8b4513;"><em>r</em><sub><em>f</em></sub></span><span class="legend-paren">)</span></span>
+              </span>
+            </div>
+          </section>
           <div class="button-group" role="group" aria-label="View selector">
             <button id="view-chart-btn" class="toggle-btn active"
               aria-pressed="true" aria-controls="chart-view">
@@ -143,31 +163,13 @@
             </button>
           </div>
         </div>
+        <p id="chart-helper-text" class="text-xs text-gray-500" style="display: none; margin-bottom: 0.75rem;">
+          Chart view is not available at narrow screen widths. Showing table view.
+        </p>
         <div class="card-content">
 
           <!-- Chart View -->
           <div id="chart-view">
-            <section aria-label="Chart legend">
-              <div class="legend" id="chart-legend" role="list">
-                <span class="legend-item" role="listitem">
-                  <span class="legend-color" style="background-color: #0079a6;" aria-hidden="true"></span>
-                  Spot rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#0079a6;"><em>S</em></span><span class="legend-paren">)</span></span> (<em>t</em>&thinsp;=&thinsp;0)
-                </span>
-                <span class="legend-item" role="listitem">
-                  <span class="legend-color" style="background-color: #50037f;" aria-hidden="true"></span>
-                  Forward rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#50037f;"><em>F</em></span><span class="legend-paren">)</span></span> (<em>t</em>&thinsp;=&thinsp;1)
-                </span>
-                <span class="legend-item" role="listitem">
-                  <span class="legend-color" style="background-color: #7a46ff;" aria-hidden="true"></span>
-                  Domestic interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#5a20cc;"><em>r</em><sub><em>d</em></sub></span><span class="legend-paren">)</span></span>
-                </span>
-                <span class="legend-item" role="listitem">
-                  <span class="legend-color" style="background-color: #ea792d;" aria-hidden="true"></span>
-                  Foreign interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#8b4513;"><em>r</em><sub><em>f</em></sub></span><span class="legend-paren">)</span></span>
-                </span>
-              </div>
-            </section>
-
             <div class="sr-only" id="exchange-chart-desc" hidden>
               <h3 id="exchange-chart-title">Forward exchange rate analysis chart</h3>
               <p>

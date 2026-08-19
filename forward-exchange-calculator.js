@@ -65,20 +65,26 @@ function isNarrow() {
 function applyViewportMode() {
   const chartBtn = $('#view-chart-btn');
   const tableBtn = $('#view-table-btn');
+  const helper = $('#chart-helper-text');
   if (!chartBtn || !tableBtn) return;
 
   if (isNarrow()) {
     chartBtn.disabled = true;
     chartBtn.setAttribute('aria-disabled', 'true');
-    chartBtn.title = 'Chart not available at this screen width — use the Table view';
+    chartBtn.setAttribute('aria-describedby', 'chart-helper-text');
+    chartBtn.removeAttribute('title');
+    tableBtn.removeAttribute('title');
+    if (helper) helper.style.display = 'block';
     switchToTableView();
   } else {
     chartBtn.disabled = false;
     chartBtn.removeAttribute('aria-disabled');
-    chartBtn.title = '';
+    chartBtn.removeAttribute('aria-describedby');
+    chartBtn.removeAttribute('title');
     tableBtn.disabled = false;
     tableBtn.removeAttribute('aria-disabled');
-    tableBtn.title = '';
+    tableBtn.removeAttribute('title');
+    if (helper) helper.style.display = 'none';
     // Re-render chart if it's currently visible, so plugin labels reposition correctly
     if (state.exchangeCalculations && $('#chart-view').style.display !== 'none') {
       renderChart(state.exchangeCalculations, state);
@@ -95,8 +101,6 @@ function switchToChartView() {
   if (!chartView || !tableView || !chartBtn || !tableBtn) return;
   chartView.style.display = 'block';
   tableView.style.display = 'none';
-  const legendSection = $('#chart-legend') && $('#chart-legend').closest('section');
-  if (legendSection) legendSection.style.display = 'block';
   chartBtn.classList.add('active');
   chartBtn.setAttribute('aria-pressed', 'true');
   tableBtn.classList.remove('active');
@@ -112,8 +116,6 @@ function switchToTableView() {
   if (!chartView || !tableView || !chartBtn || !tableBtn) return;
   chartView.style.display = 'none';
   tableView.style.display = 'block';
-  const legendSection = $('#chart-legend') && $('#chart-legend').closest('section');
-  if (legendSection) legendSection.style.display = 'none';
   chartBtn.classList.remove('active');
   chartBtn.setAttribute('aria-pressed', 'false');
   tableBtn.classList.add('active');
@@ -339,7 +341,7 @@ function renderChart(calc, params) {
   // item 6: respect prefers-reduced-motion (Chart.js 4 — use { duration: 0 }, not false)
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   
-  const systemFont = "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif";
+  const chartFont = "'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
   
   const rd = params.domesticRate;
   const rf = params.foreignRate;
@@ -465,8 +467,8 @@ function renderChart(calc, params) {
       // When lines are very close, add extra vertical offset so pills don't touch.
       const extraOffset = tooClose ? (labelHeight * 1.2 - lineSep / 2) : 0;
 
-      drawRateLabel(ctx, 'd', rd, x1, rdY, 'above', 0, '#5a20cc', '#7a46ff', systemFont, 'left');
-      drawRateLabel(ctx, 'f', rf, x2, rfY, 'below', 0, '#8b4513', '#ea792d', systemFont, 'right');
+      drawRateLabel(ctx, 'd', rd, x1, rdY, 'above', extraOffset, '#5a20cc', '#7a46ff', chartFont, 'left');
+      drawRateLabel(ctx, 'f', rf, x2, rfY, 'below', extraOffset, '#8b4513', '#ea792d', chartFont, 'right');
 
       ctx.restore();
     }
@@ -476,16 +478,16 @@ function renderChart(calc, params) {
   // "r" is drawn at fontSize, then the subscript letter at subSize shifted down by subShift.
   function drawRateLabel(ctx, subLetter, value, x, lineY, side, extraOffset, textColor, borderColor, fontFamily, anchor = 'centre') {
     const pad = { h: 7, v: 3 };
-    const fontSize = 11;
-    const subSize  = 8;
+    const fontSize = 13;
+    const subSize  = 9;
     const subShift = 3; // px downward shift for subscript
 
     // Measure each piece to calculate total pill width
-    ctx.font = `italic 700 ${fontSize}px ${fontFamily}`;
+    ctx.font = `italic 600 ${fontSize}px ${fontFamily}`;
     const rW = ctx.measureText('r').width;
-    ctx.font = `italic 700 ${subSize}px ${fontFamily}`;
+    ctx.font = `italic 600 ${subSize}px ${fontFamily}`;
     const subW = ctx.measureText(subLetter).width;
-    ctx.font = `700 ${fontSize}px ${fontFamily}`;
+    ctx.font = `600 ${fontSize}px ${fontFamily}`;
     const valW = ctx.measureText(` = ${value.toFixed(2)}%`).width;
 
     const textW = rW + subW + valW;
@@ -518,18 +520,18 @@ function renderChart(calc, params) {
     ctx.fillStyle = textColor;
 
     // ── "r" italic ──
-    ctx.font = `italic 700 ${fontSize}px ${fontFamily}`;
+    ctx.font = `italic 600 ${fontSize}px ${fontFamily}`;
     ctx.textAlign = 'left';
     ctx.fillText('r', cursor, textY);
     cursor += rW;
 
     // ── subscript letter italic, shifted down ──
-    ctx.font = `italic 700 ${subSize}px ${fontFamily}`;
+    ctx.font = `italic 600 ${subSize}px ${fontFamily}`;
     ctx.fillText(subLetter, cursor, textY + subShift);
     cursor += subW;
 
     // ── " = value%" normal weight ──
-    ctx.font = `700 ${fontSize}px ${fontFamily}`;
+    ctx.font = `600 ${fontSize}px ${fontFamily}`;
     ctx.fillText(` = ${value.toFixed(2)}%`, cursor, textY);
   }
 
@@ -559,11 +561,11 @@ function renderChart(calc, params) {
             offset: 4,
             formatter: (value, context) => {
               if (value == null) return null;
-              const varName = context.dataIndex === 0 ? 'S' : 'F';
+              const varName = context.dataIndex === 0 ? '𝑆' : '𝐹';
               return `${varName} = ${value.toFixed(4)}`;
             },
             color: (context) => context.dataIndex === 0 ? '#005f82' : '#3a0060',
-            font: { weight: '700', size: 12, family: systemFont },
+            font: { weight: '600', size: 13, family: chartFont },
             backgroundColor: 'rgba(255,255,255,0.92)',
             borderRadius: 3,
             padding: { top: 3, bottom: 3, left: 5, right: 5 }
@@ -633,7 +635,7 @@ function renderChart(calc, params) {
         x: {
           ticks: {
             color: '#374151',
-            font: { size: 13, weight: '600', family: systemFont }
+            font: { size: 13, weight: '600', family: chartFont }
           },
           grid: { color: '#e5e7eb' }
         },
@@ -643,7 +645,7 @@ function renderChart(calc, params) {
             display: true,
             text: 'Exchange rate',
             color: '#374151',
-            font: { size: 13, weight: '600', family: systemFont }
+            font: { size: 13, weight: '600', family: chartFont }
           },
           min: exMin,
           max: exMax,
@@ -652,7 +654,7 @@ function renderChart(calc, params) {
             autoSkip: false,
             callback: (v) => Number(v).toFixed(exDecimals),
             color: '#374151',
-            font: { size: 13, weight: '600', family: systemFont }
+            font: { size: 13, weight: '600', family: chartFont }
           },
           grid: { drawOnChartArea: false }
         },
@@ -662,7 +664,7 @@ function renderChart(calc, params) {
             display: true,
             text: 'Interest rate (%)',
             color: '#374151',
-            font: { size: 13, weight: '600', family: systemFont }
+            font: { size: 13, weight: '600', family: chartFont }
           },
           min: rateMin,
           max: rateMax,
@@ -671,7 +673,7 @@ function renderChart(calc, params) {
             autoSkip: false,
             callback: sparseRateTickLabel,
             color: '#374151',
-            font: { size: 13, weight: '600', family: systemFont }
+            font: { size: 13, weight: '600', family: chartFont }
           },
           grid: { color: '#e5e7eb' }
         }
