@@ -12,6 +12,18 @@ import {
   NUMERIC_INPUT_MAX_CHARS
 } from './exchange-modules/utils.js';
 
+/** Variables are italicised by the Unicode math-italic glyph, not by font-style. */
+const ITALIC_r = '\u{1D45F}'; // 𝑟
+const ITALIC_d = '\u{1D451}'; // 𝑑
+const ITALIC_f = '\u{1D453}'; // 𝑓
+
+/** In pill labels only the variable carries colour; the operator and value stay neutral. */
+const LABEL_TEXT_COLOR = '#374151';
+
+/** Shared pill geometry so every label box has the same breathing space. */
+const LABEL_PAD_X = 8;
+const LABEL_PAD_Y = 5;
+
 function init() {
   setupInputListeners();
   setupViewToggle();
@@ -427,7 +439,7 @@ function renderChart(calc, params) {
 
       // How many px apart are the two lines? Used to decide label stacking
       const lineSep = Math.abs(rdY - rfY);
-      const labelHeight = 20; // approximate px height of a label pill
+      const labelHeight = 13 + LABEL_PAD_Y * 2; // px height of a label pill
       const tooClose = lineSep < labelHeight * 2.2;
 
       ctx.save();
@@ -467,8 +479,8 @@ function renderChart(calc, params) {
       // When lines are very close, add extra vertical offset so pills don't touch.
       const extraOffset = tooClose ? (labelHeight * 1.2 - lineSep / 2) : 0;
 
-      drawRateLabel(ctx, 'd', rd, x1, rdY, 'above', extraOffset, '#5a20cc', '#7a46ff', chartFont, 'left');
-      drawRateLabel(ctx, 'f', rf, x2, rfY, 'below', extraOffset, '#8b4513', '#ea792d', chartFont, 'right');
+      drawRateLabel(ctx, ITALIC_d, rd, x1, rdY, 'above', extraOffset, '#5a20cc', '#7a46ff', chartFont, 'left');
+      drawRateLabel(ctx, ITALIC_f, rf, x2, rfY, 'below', extraOffset, '#8b4513', '#ea792d', chartFont, 'right');
 
       ctx.restore();
     }
@@ -477,18 +489,17 @@ function renderChart(calc, params) {
   // Draws a rate label pill with a manually rendered subscript.
   // "r" is drawn at fontSize, then the subscript letter at subSize shifted down by subShift.
   function drawRateLabel(ctx, subLetter, value, x, lineY, side, extraOffset, textColor, borderColor, fontFamily, anchor = 'centre') {
-    const pad = { h: 7, v: 3 };
+    const pad = { h: LABEL_PAD_X, v: LABEL_PAD_Y };
     const fontSize = 13;
     const subSize  = 9;
     const subShift = 3; // px downward shift for subscript
 
     // Measure each piece to calculate total pill width
-    ctx.font = `italic 600 ${fontSize}px ${fontFamily}`;
-    const rW = ctx.measureText('r').width;
-    ctx.font = `italic 600 ${subSize}px ${fontFamily}`;
-    const subW = ctx.measureText(subLetter).width;
     ctx.font = `600 ${fontSize}px ${fontFamily}`;
+    const rW = ctx.measureText(ITALIC_r).width;
     const valW = ctx.measureText(` = ${value.toFixed(2)}%`).width;
+    ctx.font = `600 ${subSize}px ${fontFamily}`;
+    const subW = ctx.measureText(subLetter).width;
 
     const textW = rW + subW + valW;
     const boxW  = textW + pad.h * 2;
@@ -520,18 +531,19 @@ function renderChart(calc, params) {
     ctx.fillStyle = textColor;
 
     // ── "r" italic ──
-    ctx.font = `italic 600 ${fontSize}px ${fontFamily}`;
+    ctx.font = `600 ${fontSize}px ${fontFamily}`;
     ctx.textAlign = 'left';
-    ctx.fillText('r', cursor, textY);
+    ctx.fillText(ITALIC_r, cursor, textY);
     cursor += rW;
-
-    // ── subscript letter italic, shifted down ──
-    ctx.font = `italic 600 ${subSize}px ${fontFamily}`;
+    
+    // ── subscript letter, shifted down ──
+    ctx.font = `600 ${subSize}px ${fontFamily}`;
     ctx.fillText(subLetter, cursor, textY + subShift);
     cursor += subW;
-
-    // ── " = value%" normal weight ──
+    
+    // ── neutral " = value%" ──
     ctx.font = `600 ${fontSize}px ${fontFamily}`;
+    ctx.fillStyle = LABEL_TEXT_COLOR;
     ctx.fillText(` = ${value.toFixed(2)}%`, cursor, textY);
   }
 
