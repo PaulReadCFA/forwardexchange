@@ -9,20 +9,30 @@ import {
   formatPercentage,
   announceToScreenReader,
   clampNumericInputLength,
+  applyTableRoles,
   NUMERIC_INPUT_MAX_CHARS
 } from './exchange-modules/utils.js';
+import { getChartTypography } from './chart-typography.js';
 
 /** Variables are italicised by the Unicode math-italic glyph, not by font-style. */
 const ITALIC_r = '\u{1D45F}'; // 𝑟
 const ITALIC_d = '\u{1D451}'; // 𝑑
 const ITALIC_f = '\u{1D453}'; // 𝑓
+const ITALIC_t = '\u{1D461}'; // 𝑡
 
 /** In pill labels only the variable carries colour; the operator and value stay neutral. */
 const LABEL_TEXT_COLOR = '#374151';
 
 /** Shared pill geometry so every label box has the same breathing space. */
-const LABEL_PAD_X = 8;
-const LABEL_PAD_Y = 5;
+let LABEL_PAD_X = 8;
+let LABEL_PAD_Y = 5;
+
+function syncChartTypography() {
+  const t = getChartTypography('curriculum');
+  LABEL_PAD_X = t.pill.padX;
+  LABEL_PAD_Y = t.pill.padY;
+  return t;
+}
 
 function init() {
   setupInputListeners();
@@ -302,36 +312,44 @@ function renderDynamicEquation(calc, params) {
 }
 
 // ── Table ─────────────────────────────────────────────────────────────────────
-// item 17: single-letter variables italicised in table body
+// Table text stays neutral for contrast on striped rows.
 function renderTable(calc, params) {
   const tableBody = $('#table-body');
   if (!tableBody || !calc) return;
   
+  // data-label mirrors the column header: it becomes the visible label when the
+  // shared base reflows each row into a card below 768px. cell-value keeps the
+  // value as a single element so it stays on the right of that label.
+  const T0 = `${ITALIC_t}\u2009=\u20090`;
+  const T1 = `${ITALIC_t}\u2009=\u20091`;
+
   tableBody.innerHTML = `
     <tr>
       <th scope="row">Exchange Rate</th>
-      <td><span style="color: #0079a6; font-weight: 600;"><em>S</em>:</span> ${params.spotRate.toFixed(4)}</td>
-      <td><span style="color: #50037f; font-weight: 600;"><em>F</em>:</span> ${calc.forwardRate.toFixed(4)}</td>
+      <td data-label="${T0}"><span class="cell-value table-var-4">𝑆 = ${params.spotRate.toFixed(4)}</span></td>
+      <td data-label="${T1}"><span class="cell-value table-var-3">𝐹 = ${calc.forwardRate.toFixed(4)}</span></td>
     </tr>
     <tr>
       <th scope="row">Domestic Interest Rate</th>
-      <td colspan="2"><span style="color: #5a20cc; font-weight: 600;"><em>r</em><sub><em>d</em></sub>:</span> ${formatPercentage(params.domesticRate)}</td>
+      <td colspan="2" data-label="${T0} and ${T1}"><span class="cell-value table-var-3">${ITALIC_r}<sub>${ITALIC_d}</sub> = ${formatPercentage(params.domesticRate)}</span></td>
     </tr>
     <tr>
       <th scope="row">Foreign Interest Rate</th>
-      <td colspan="2"><span style="color: #8b4513; font-weight: 600;"><em>r</em><sub><em>f</em></sub>:</span> ${formatPercentage(params.foreignRate)}</td>
+      <td colspan="2" data-label="${T0} and ${T1}"><span class="cell-value table-var-6">${ITALIC_r}<sub>${ITALIC_f}</sub> = ${formatPercentage(params.foreignRate)}</span></td>
     </tr>
     <tr>
       <th scope="row">Domestic Investment (USD)</th>
-      <td>1,000.00</td>
-      <td>${formatCurrency(calc.domesticEndingValue, false, false)}</td>
+      <td data-label="${T0}"><span class="cell-value">1,000.00</span></td>
+      <td data-label="${T1}"><span class="cell-value">${formatCurrency(calc.domesticEndingValue, false, false)}</span></td>
     </tr>
     <tr>
       <th scope="row">Foreign Investment (USD)</th>
-      <td>1,000.00</td>
-      <td>${formatCurrency(calc.domesticEquivalent, false, false)}</td>
+      <td data-label="${T0}"><span class="cell-value">1,000.00</span></td>
+      <td data-label="${T1}"><span class="cell-value">${formatCurrency(calc.domesticEquivalent, false, false)}</span></td>
     </tr>
   `;
+
+  applyTableRoles($('#data-table'));
 }
 
 // ── Chart ─────────────────────────────────────────────────────────────────────
@@ -340,6 +358,7 @@ function renderTable(calc, params) {
 // item 6: prefers-reduced-motion disables chart animation.
 // Chart.js font changes: all scale fonts updated to size 13, system-font family, weight 600.
 function renderChart(calc, params) {
+  const type = syncChartTypography();
   const canvas = $('#exchange-chart');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
@@ -353,7 +372,9 @@ function renderChart(calc, params) {
   // item 6: respect prefers-reduced-motion (Chart.js 4 — use { duration: 0 }, not false)
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   
-  const chartFont = "'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+  const chartFont = type.font.family;
+  const chartFontSize = type.font.size;
+  const chartSubscriptSize = type.subscript.size;
   
   const rd = params.domesticRate;
   const rf = params.foreignRate;
@@ -439,7 +460,7 @@ function renderChart(calc, params) {
 
       // How many px apart are the two lines? Used to decide label stacking
       const lineSep = Math.abs(rdY - rfY);
-      const labelHeight = 13 + LABEL_PAD_Y * 2; // px height of a label pill
+      const labelHeight = chartFontSize + LABEL_PAD_Y * 2;
       const tooClose = lineSep < labelHeight * 2.2;
 
       ctx.save();
@@ -490,9 +511,9 @@ function renderChart(calc, params) {
   // "r" is drawn at fontSize, then the subscript letter at subSize shifted down by subShift.
   function drawRateLabel(ctx, subLetter, value, x, lineY, side, extraOffset, textColor, borderColor, fontFamily, anchor = 'centre') {
     const pad = { h: LABEL_PAD_X, v: LABEL_PAD_Y };
-    const fontSize = 13;
-    const subSize  = 9;
-    const subShift = 3; // px downward shift for subscript
+    const fontSize = chartFontSize;
+    const subSize  = chartSubscriptSize;
+    const subShift = type.subscript.shift;
 
     // Measure each piece to calculate total pill width
     ctx.font = `600 ${fontSize}px ${fontFamily}`;
@@ -577,7 +598,7 @@ function renderChart(calc, params) {
               return `${varName} = ${value.toFixed(4)}`;
             },
             color: (context) => context.dataIndex === 0 ? '#005f82' : '#3a0060',
-            font: { weight: '600', size: 13, family: chartFont },
+            font: { weight: '600', size: chartFontSize, family: chartFont },
             backgroundColor: 'rgba(255,255,255,0.92)',
             borderRadius: 3,
             padding: { top: 3, bottom: 3, left: 5, right: 5 }
@@ -647,7 +668,7 @@ function renderChart(calc, params) {
         x: {
           ticks: {
             color: '#374151',
-            font: { size: 13, weight: '600', family: chartFont }
+            font: { size: chartFontSize, weight: '600', family: chartFont }
           },
           grid: { color: '#e5e7eb' }
         },
@@ -657,7 +678,7 @@ function renderChart(calc, params) {
             display: true,
             text: 'Exchange rate',
             color: '#374151',
-            font: { size: 13, weight: '600', family: chartFont }
+            font: { size: chartFontSize, weight: '600', family: chartFont }
           },
           min: exMin,
           max: exMax,
@@ -666,7 +687,7 @@ function renderChart(calc, params) {
             autoSkip: false,
             callback: (v) => Number(v).toFixed(exDecimals),
             color: '#374151',
-            font: { size: 13, weight: '600', family: chartFont }
+            font: { size: chartFontSize, weight: '600', family: chartFont }
           },
           grid: { drawOnChartArea: false }
         },
@@ -676,7 +697,7 @@ function renderChart(calc, params) {
             display: true,
             text: 'Interest rate (%)',
             color: '#374151',
-            font: { size: 13, weight: '600', family: chartFont }
+            font: { size: chartFontSize, weight: '600', family: chartFont }
           },
           min: rateMin,
           max: rateMax,
@@ -685,7 +706,7 @@ function renderChart(calc, params) {
             autoSkip: false,
             callback: sparseRateTickLabel,
             color: '#374151',
-            font: { size: 13, weight: '600', family: chartFont }
+            font: { size: chartFontSize, weight: '600', family: chartFont }
           },
           grid: { color: '#e5e7eb' }
         }

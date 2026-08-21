@@ -74,60 +74,11 @@
 }
 
 /* Input styling */
-.input-group-inline {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 1rem 1.25rem;
-}
-
-.input-inline {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  white-space: nowrap;
-}
-
-.input-label-inline {
-  font-size: 0.875rem;
-  color: var(--color-gray-700);
-  min-width: 120px;
-  font-weight: 500;
-}
-
-.input-with-suffix-inline {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  width: 7rem;
-  position: relative;
-}
-
-.input-field-inline {
-  flex: 1;
-  width: 100%;
-  padding: 0.4rem 2rem 0.4rem 0.5rem;
-  border: 1px solid #8b93a7;
-  border-radius: 0.375rem;
-  font-family: inherit;
-  font-size: 0.875rem;
-  text-align: right;
-  box-sizing: border-box;
-}
-
-.input-suffix-inline {
-  position: absolute;
-  right: 0.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-gray-500);
-  pointer-events: none;
-  width: auto;
-  min-width: 1.2rem;
-  text-align: right;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
+/* Data entry comes from cfa-base.css. Only the label variable colours
+   are forward-exchange-specific. */
+.label-var-spot     { color: var(--color-spot-rate); }
+.label-var-domestic { color: var(--color-domestic-rate-dark); }
+.label-var-foreign  { color: var(--color-foreign-rate-dark); }
 
 /* Narrow viewport: chart button disabled */
 #view-chart-btn:disabled {
@@ -139,39 +90,11 @@
 #calculator .input-section {
   max-width: 100%;
   min-width: 0;
-  overflow-x: hidden;
 }
 
 #calculator .validation-summary {
   margin-top: 0;
   margin-bottom: 0.75rem;
-}
-
-@media (max-width: 640px) {
-  .input-group-inline {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  .input-inline {
-    width: 100%;
-    max-width: 100%;
-    flex-wrap: wrap;
-    white-space: normal;
-    align-items: flex-start;
-    box-sizing: border-box;
-  }
-  .input-label-inline {
-    flex: 1 1 100%;
-    max-width: 100%;
-    min-width: 0;
-    white-space: normal;
-  }
-  .input-with-suffix-inline {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-  }
 }
 
 /* MathJax equation styling */

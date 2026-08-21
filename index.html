@@ -78,19 +78,18 @@
             <div class="input-group-inline">
               <div class="input-inline">
                 <label for="spot-rate" class="input-label-inline">
-                  Spot exchange rate (<em style="color:#0079a6; font-weight:600;">S</em>):
+                  Spot exchange rate (<span class="label-var-spot">𝑆</span>):
                 </label>
                 <div class="input-with-suffix-inline">
                   <input type="number" id="spot-rate" class="input-field-inline"
                     min="0.1" max="10" step="0.01" value="1.25"
                     inputmode="decimal" aria-describedby="inputHelp">
-                  <span class="input-suffix-inline">&nbsp;</span>
                 </div>
               </div>
 
               <div class="input-inline">
                 <label for="domestic-rate" class="input-label-inline">
-                  Domestic interest rate (<em style="color:#5a20cc; font-weight:600;">r</em><sub style="color:#5a20cc; font-weight:600;"><em>d</em></sub>):
+                  Domestic interest rate (<span class="label-var-domestic">𝑟<sub>𝑑</sub></span>):
                 </label>
                 <div class="input-with-suffix-inline">
                   <input type="number" id="domestic-rate" class="input-field-inline"
@@ -102,7 +101,7 @@
 
               <div class="input-inline">
                 <label for="foreign-rate" class="input-label-inline">
-                  Foreign interest rate (<em style="color:#8b4513; font-weight:600;">r</em><sub style="color:#8b4513; font-weight:600;"><em>f</em></sub>):
+                  Foreign interest rate (<span class="label-var-foreign">𝑟<sub>𝑓</sub></span>):
                 </label>
                 <div class="input-with-suffix-inline">
                   <input type="number" id="foreign-rate" class="input-field-inline"
@@ -136,19 +135,19 @@
             <div class="legend" id="chart-legend" role="list">
               <span class="legend-item" role="listitem">
                 <span class="legend-color" style="background-color: #0079a6;" aria-hidden="true"></span>
-                Spot rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#0079a6;"><em>S</em></span><span class="legend-paren">)</span></span> (<em>t</em>&thinsp;=&thinsp;0)
+                Spot rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#0079a6;">𝑆</span><span class="legend-paren">)</span></span> (<em>t</em>&thinsp;=&thinsp;0)
               </span>
               <span class="legend-item" role="listitem">
                 <span class="legend-color" style="background-color: #50037f;" aria-hidden="true"></span>
-                Forward rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#50037f;"><em>F</em></span><span class="legend-paren">)</span></span> (<em>t</em>&thinsp;=&thinsp;1)
+                Forward rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#50037f;">𝐹</span><span class="legend-paren">)</span></span> (<em>t</em>&thinsp;=&thinsp;1)
               </span>
               <span class="legend-item" role="listitem">
                 <span class="legend-color" style="background-color: #7a46ff;" aria-hidden="true"></span>
-                Domestic interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#5a20cc;"><em>r</em><sub><em>d</em></sub></span><span class="legend-paren">)</span></span>
+                Domestic interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#5a20cc;">𝑟<sub>𝑑</sub></span><span class="legend-paren">)</span></span>
               </span>
               <span class="legend-item" role="listitem">
                 <span class="legend-color" style="background-color: #ea792d;" aria-hidden="true"></span>
-                Foreign interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#8b4513;"><em>r</em><sub><em>f</em></sub></span><span class="legend-paren">)</span></span>
+                Foreign interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#8b4513;">𝑟<sub>𝑓</sub></span><span class="legend-paren">)</span></span>
               </span>
             </div>
           </section>
@@ -188,14 +187,14 @@
 
           <!-- Table View -->
           <div id="table-view" tabindex="-1" style="display: none;">
-            <div class="table-wrapper">
-              <table id="data-table" class="data-table" aria-label="Forward Exchange Rate Analysis Data Table">
-                <caption>Forward Exchange Rate Analysis Data</caption>
+            <div class="table-wrapper table-card-layout" role="region" aria-label="Forward exchange rate table" tabindex="0">
+              <table id="data-table" class="data-table">
+                <caption class="sr-only">Forward exchange rate analysis data</caption>
                 <thead>
                   <tr>
                     <th scope="col">Metric</th>
-                    <th scope="col"><em>t</em>&thinsp;=&thinsp;0</th>
-                    <th scope="col"><em>t</em>&thinsp;=&thinsp;1</th>
+                    <th scope="col" class="table-var-4">&#x1D461;&thinsp;=&thinsp;0</th>
+                    <th scope="col" class="table-var-4">&#x1D461;&thinsp;=&thinsp;1</th>
                   </tr>
                 </thead>
                 <tbody id="table-body">
