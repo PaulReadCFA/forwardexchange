@@ -1,21 +1,7 @@
 /* Forward Exchange Rate Calculator Specific Styles */
 
-/* Chart legend: keep parentheses tight to coloured variables (italic sidebearings) */
-#chart-legend .legend-var-wrap {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 0;
-  vertical-align: baseline;
-}
-
-#chart-legend .legend-paren {
-  color: var(--color-gray-700);
-  font-weight: inherit;
-}
-
 #chart-legend .legend-var {
   font-weight: 600;
-  margin: 0 -0.06em;
 }
 
 #chart-legend .legend-var em {
