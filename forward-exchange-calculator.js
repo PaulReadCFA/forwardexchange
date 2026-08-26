@@ -305,7 +305,7 @@ function renderResults(calc, params) {
   container.innerHTML = `
     <div class="result-box forward-exchange">
       <h3 class="result-title forward-exchange">Implied Forward Exchange Rate</h3>
-      <div class="result-value" style="color: #50037f;">${calc.forwardRate.toFixed(4)}</div>
+      <div class="result-value forward-rate-value">${calc.forwardRate.toFixed(4)}</div>
     </div>
     
     <div class="result-box domestic-strategy">
@@ -647,7 +647,7 @@ function renderChart(calc, params) {
     plugins: [rateLinesPlugin],
     data: {
       // Three x-axis positions: bars at 0 and 2, lines pass through middle gap (1)
-      labels: ['t\u2009=\u20090', '\u00a0', 't\u2009=\u20091'],
+      labels: [`${ITALIC_t}\u2009=\u20090`, '\u00a0', `${ITALIC_t}\u2009=\u20091`],
       datasets: [
         {
           // Single bar dataset — spot at index 0, forward at index 2; different colours per bar

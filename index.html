@@ -8,7 +8,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,500;0,600;0,700;1,400;1,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="cfa-base.css">
   <link rel="stylesheet" href="forward-exchange-specific.css">
@@ -58,8 +58,8 @@
     <main class="content">
 
       <!-- Card 1: Calculator -->
-      <section class="card" id="calculator" tabindex="-1">
-        <h2 class="card-title">Implied Forward Exchange Rate Calculator</h2>
+      <section class="card" id="calculator" tabindex="-1" aria-labelledby="calculator-title">
+        <h4 class="card-title" id="calculator-title">Implied Forward Exchange Rate Calculator</h4>
         <div class="card-content">
           <p class="equation-intro">
             Enter your exchange and interest rates below. The forward exchange rate calculation and visualizations will update automatically as you change the values.
@@ -116,10 +116,10 @@
       </section>
 
       <!-- Card 2: Dynamic Equation -->
-      <section id="equation-card" class="card" aria-label="Implied forward exchange rate equation">
-        <h2 class="card-title">Implied Forward Exchange Rate Equation</h2>
+      <section id="equation-card" class="card" aria-labelledby="equation-title">
+        <h4 class="card-title" id="equation-title">Implied Forward Exchange Rate Equation</h4>
         <p class="equation-intro">Using your inputs, the equation becomes:</p>
-        <div class="equation-container" role="region" aria-label="Forward exchange rate calculation with your values" id="dynamic-equation-container" style="min-height: 120px;">
+        <div class="equation-container" role="region" aria-label="Forward exchange rate calculation with your values" id="dynamic-equation-container">
           <p class="sr-only" id="equation-sr-description"></p>
           <div id="dynamic-mathml-equation" class="mathjax-equation">
             <!-- Populated by JavaScript -->
@@ -128,26 +128,27 @@
       </section>
 
       <!-- Card 3: Chart/Table Visualizer -->
-      <section class="card" id="visualizer" tabindex="-1">
-        <h2 class="card-title">Implied Forward Exchange Rate Analysis</h2>
-        <div class="view-controls">
+      <section class="card" id="visualizer" tabindex="-1" aria-labelledby="visualizer-title">
+        <h4 class="card-title" id="visualizer-title">Implied Forward Exchange Rate Analysis</h4>
+        <div class="card-content">
+          <div class="view-controls">
           <section aria-label="Chart legend">
             <div class="legend" id="chart-legend" role="list">
               <span class="legend-item" role="listitem">
-                <span class="legend-color" style="background-color: #0079a6;" aria-hidden="true"></span>
-                Spot rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#0079a6;">𝑆</span><span class="legend-paren">)</span></span> (<em>t</em>&thinsp;=&thinsp;0)
+                <span class="legend-color legend-swatch-spot" aria-hidden="true"></span>
+                Spot rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var legend-var-spot">𝑆</span><span class="legend-paren">)</span></span> (𝑡&thinsp;=&thinsp;0)
               </span>
               <span class="legend-item" role="listitem">
-                <span class="legend-color" style="background-color: #50037f;" aria-hidden="true"></span>
-                Forward rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#50037f;">𝐹</span><span class="legend-paren">)</span></span> (<em>t</em>&thinsp;=&thinsp;1)
+                <span class="legend-color legend-swatch-forward" aria-hidden="true"></span>
+                Forward rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var legend-var-forward">𝐹</span><span class="legend-paren">)</span></span> (𝑡&thinsp;=&thinsp;1)
               </span>
               <span class="legend-item" role="listitem">
-                <span class="legend-color" style="background-color: #7a46ff;" aria-hidden="true"></span>
-                Domestic interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#5a20cc;">𝑟<sub>𝑑</sub></span><span class="legend-paren">)</span></span>
+                <span class="legend-color legend-swatch-domestic" aria-hidden="true"></span>
+                Domestic interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var legend-var-domestic">𝑟<sub>𝑑</sub></span><span class="legend-paren">)</span></span>
               </span>
               <span class="legend-item" role="listitem">
-                <span class="legend-color" style="background-color: #ea792d;" aria-hidden="true"></span>
-                Foreign interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var" style="color:#8b4513;">𝑟<sub>𝑓</sub></span><span class="legend-paren">)</span></span>
+                <span class="legend-color legend-swatch-foreign" aria-hidden="true"></span>
+                Foreign interest rate <span class="legend-var-wrap"><span class="legend-paren">(</span><span class="legend-var legend-var-foreign">𝑟<sub>𝑓</sub></span><span class="legend-paren">)</span></span>
               </span>
             </div>
           </section>
@@ -161,21 +162,20 @@
               Table
             </button>
           </div>
-        </div>
-        <p id="chart-helper-text" class="text-xs text-gray-500" style="display: none; margin-bottom: 0.75rem;">
-          Chart view is not available at narrow screen widths. Showing table view.
-        </p>
-        <p id="view-toggle-help" class="sr-only">
-          Chart and Table act as a single toolbar: only one button is in the tab order at a time. Use left and right arrow keys to move between them. Table lists every value in one place.
-        </p>
-        <div class="card-content">
+          </div>
+          <p id="chart-helper-text" class="text-xs text-gray-500" style="display: none; margin-bottom: 0.75rem;">
+            Chart view is not available at narrow screen widths. Showing table view.
+          </p>
+          <p id="view-toggle-help" class="sr-only">
+            Chart and Table act as a single toolbar: only one button is in the tab order at a time. Use left and right arrow keys to move between them. Table lists every value in one place.
+          </p>
 
           <!-- Chart View -->
           <div id="chart-view">
             <div class="sr-only" id="exchange-chart-desc">
-              <h3 id="exchange-chart-title">Forward exchange rate analysis chart</h3>
+              <h4 id="exchange-chart-title">Forward exchange rate analysis chart</h4>
               <p>
-                This chart shows the spot exchange rate at t&thinsp;=&thinsp;0 and the implied forward rate at t&thinsp;=&thinsp;1 as bars, with domestic and foreign interest rates as horizontal lines between them.
+                This chart shows the spot exchange rate at 𝑡&thinsp;=&thinsp;0 and the implied forward rate at 𝑡&thinsp;=&thinsp;1 as bars, with domestic and foreign interest rates as horizontal lines between them.
                 The forward rate is calculated using covered interest rate parity.
                 All chart data is available in the Table view. To switch, activate the Table button above.
               </p>
@@ -185,8 +185,7 @@
             </p>
             <p id="chart-point-announcement" class="sr-only" aria-live="polite" aria-atomic="true"></p>
 
-            <div id="chart-container" class="chart-wrapper"
-                 style="height: 28rem;">
+            <div id="chart-container" class="chart-wrapper">
               <canvas id="exchange-chart"
                       tabindex="0"
                       role="img"
@@ -217,8 +216,8 @@
       </section>
 
       <!-- Card 4: Results & Analysis -->
-      <section class="card" id="results-card">
-        <h2 class="card-title">Results and Analysis</h2>
+      <section class="card" id="results-card" aria-labelledby="results-title">
+        <h4 class="card-title" id="results-title">Results and Analysis</h4>
         <div class="card-content">
           <p class="sr-only" id="results-live" aria-live="polite" aria-atomic="true"></p>
           <div id="results-content">

@@ -53,6 +53,10 @@
   max-width: 100%;
 }
 
+.result-value.forward-rate-value {
+  color: var(--color-forward-rate);
+}
+
 .strategy-details {
   font-size: 0.8125rem;
   color: #1f2937;
@@ -66,12 +70,14 @@
 .label-var-domestic { color: var(--color-domestic-rate-dark); }
 .label-var-foreign  { color: var(--color-foreign-rate-dark); }
 
-/* Narrow viewport: chart button disabled */
-#view-chart-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-  pointer-events: none;
-}
+.legend-swatch-spot { background-color: var(--color-spot-rate); }
+.legend-swatch-forward { background-color: var(--color-forward-rate); }
+.legend-swatch-domestic { background-color: var(--color-domestic-rate); }
+.legend-swatch-foreign { background-color: var(--color-foreign-rate); }
+.legend-var-spot { color: var(--color-spot-rate); }
+.legend-var-forward { color: var(--color-forward-rate); }
+.legend-var-domestic { color: var(--color-domestic-rate-dark); }
+.legend-var-foreign { color: var(--color-foreign-rate-dark); }
 
 #calculator .input-section {
   max-width: 100%;
@@ -101,6 +107,14 @@
   border-radius: 0.5rem;
   overflow-x: auto;
   max-width: 100%;
+}
+
+#equation-card #dynamic-equation-container {
+  min-height: 7.5rem;
+}
+
+#visualizer #chart-container {
+  min-height: 28rem;
 }
 
 /* Responsive equation scaling */
