@@ -183,10 +183,11 @@ function setupInputListeners() {
       const error = validateField(field, value);
       updateFieldError(id, error);
       const errors = { ...state.errors };
+      delete errors.calculation;
       if (error) { errors[field] = error; } else { delete errors[field]; }
       setState({ [field]: value, errors });
       updateValidationSummary(errors);
-      if (!hasErrors(errors)) updateCalculations();
+      updateCalculations();
     }, 300);
     
     const onInput = () => {
@@ -206,16 +207,40 @@ function updateCalculations() {
     setState({ exchangeCalculations: calculations });
   } catch (error) {
     console.error('Calculation error:', error);
-    setState({ exchangeCalculations: null });
+    const calculationErrors = {
+      ...state.errors,
+      calculation: error.message || 'Unable to calculate the forward exchange rate'
+    };
+    setState({ exchangeCalculations: null, errors: calculationErrors });
+    updateValidationSummary(calculationErrors);
   }
 }
 
 function handleStateChange(newState) {
   const { exchangeCalculations } = newState;
-  if (!exchangeCalculations) return;
+  if (!exchangeCalculations) {
+    clearCalculatedViews();
+    return;
+  }
   renderResults(exchangeCalculations, newState);
   renderDynamicEquation(exchangeCalculations, newState);
   renderChart(exchangeCalculations, newState);
+}
+
+function clearCalculatedViews() {
+  if (window.exchangeChart) {
+    window.exchangeChart.destroy();
+    window.exchangeChart = null;
+  }
+
+  const results = $('#results-content');
+  if (results) results.innerHTML = '';
+
+  const equation = $('#dynamic-mathml-equation');
+  if (equation) equation.innerHTML = '';
+
+  const tableBody = $('#table-body');
+  if (tableBody) tableBody.innerHTML = '';
 }
 
 // ── Results ──────────────────────────────────────────────────────────────────

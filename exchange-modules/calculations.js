@@ -17,6 +17,18 @@ export function calculateForwardExchange({ spotRate, domesticRate, foreignRate }
   // Arbitrage check
   const arbitrageDiff = Math.abs(domesticEndingValue - domesticEquivalent);
   const noArbitrage = arbitrageDiff < 0.01;
+
+  const outputs = [
+    forwardRate,
+    domesticEndingValue,
+    foreignEndingValue,
+    foreignCurrencyAmount,
+    domesticEquivalent,
+    arbitrageDiff
+  ];
+  if (forwardRate <= 0 || !outputs.every(Number.isFinite)) {
+    throw new RangeError('Forward exchange calculation produced a non-finite result');
+  }
   
   return {
     forwardRate,
