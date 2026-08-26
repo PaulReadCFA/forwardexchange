@@ -850,29 +850,24 @@ function setupExchangeChartKeyboard(canvas, calc, params) {
 }
 
 // ── Self-tests ────────────────────────────────────────────────────────────────
+function logSelfTest(name, passed, detail) {
+  if (passed) console.log(`✓ ${name}`);
+  else console.warn(`✗ ${name}${detail ? ': ' + detail : ''}`);
+}
+
 function runSelfTests() {
-  const tests = [
-    {
-      name: 'Forward exchange calculation',
-      inputs: { spotRate: 1.25, domesticRate: 2.5, foreignRate: 3.0 },
-      expected: { forwardApprox: 1.2563 }
-    }
-  ];
-  tests.forEach(test => {
-    try {
-      const result = calculateExchangeMetrics(test.inputs);
-      if (test.expected.forwardApprox) {
-        const diff = Math.abs(result.forwardRate - test.expected.forwardApprox);
-        if (diff <= 0.001) {
-          console.log(`✓ ${test.name} passed`);
-        } else {
-          console.warn(`✗ ${test.name} failed: expected ~${test.expected.forwardApprox}, got ${result.forwardRate.toFixed(4)}`);
-        }
-      }
-    } catch (error) {
-      console.error(`✗ ${test.name} threw error:`, error);
-    }
-  });
+  console.log('Running self-tests...');
+  const result = calculateExchangeMetrics({ spotRate: 1.25, domesticRate: 2.5, foreignRate: 3.0 });
+  logSelfTest('Defaults → F ≈ 1.2563', Math.abs(result.forwardRate - 1.2563) <= 0.001, `got ${result.forwardRate}`);
+  logSelfTest('Valid outputs are finite', Number.isFinite(result.forwardRate));
+
+  const empty = validateAll({ spotRate: NaN, domesticRate: 2.5, foreignRate: 3.0 });
+  logSelfTest('Empty spot rate is required', Boolean(empty.spotRate));
+
+  const range = validateAll({ spotRate: 1.25, domesticRate: -100, foreignRate: 3.0 });
+  logSelfTest('Domestic rate ≤ −100% is rejected', Boolean(range.domesticRate));
+
+  console.log('Self-tests complete');
 }
 
 if (document.readyState === 'loading') {
