@@ -179,14 +179,16 @@
             </div>
 
             <div id="chart-container" class="chart-wrapper"
-                 aria-hidden="true"
                  style="height: 28rem;">
-              <canvas id="exchange-chart"></canvas>
+              <canvas id="exchange-chart"
+                      role="img"
+                      aria-labelledby="exchange-chart-title"
+                      aria-describedby="exchange-chart-desc"></canvas>
             </div>
           </div>
 
           <!-- Table View -->
-          <div id="table-view" tabindex="-1" style="display: none;">
+          <div id="table-view" tabindex="-1" aria-hidden="true" style="display: none;">
             <div class="table-wrapper table-card-layout" role="region" aria-label="Forward exchange rate table" tabindex="0">
               <table id="data-table" class="data-table">
                 <caption class="sr-only">Forward exchange rate analysis data</caption>

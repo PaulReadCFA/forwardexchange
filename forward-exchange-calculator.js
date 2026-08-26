@@ -122,7 +122,9 @@ function switchToChartView() {
   const tableView = $('#table-view');
   if (!chartView || !tableView || !chartBtn || !tableBtn) return;
   chartView.style.display = 'block';
+  chartView.setAttribute('aria-hidden', 'false');
   tableView.style.display = 'none';
+  tableView.setAttribute('aria-hidden', 'true');
   chartBtn.classList.add('active');
   chartBtn.setAttribute('aria-pressed', 'true');
   tableBtn.classList.remove('active');
@@ -137,7 +139,9 @@ function switchToTableView() {
   const tableView = $('#table-view');
   if (!chartView || !tableView || !chartBtn || !tableBtn) return;
   chartView.style.display = 'none';
+  chartView.setAttribute('aria-hidden', 'true');
   tableView.style.display = 'block';
+  tableView.setAttribute('aria-hidden', 'false');
   chartBtn.classList.remove('active');
   chartBtn.setAttribute('aria-pressed', 'false');
   tableBtn.classList.add('active');
