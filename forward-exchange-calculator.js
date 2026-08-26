@@ -1,6 +1,6 @@
 import { state, setState, subscribe } from './exchange-modules/state.js';
 import { calculateExchangeMetrics } from './exchange-modules/calculations.js';
-import { validateField, updateFieldError, updateValidationSummary, hasErrors } from './exchange-modules/validation.js';
+import { validateAll, updateFieldError, updateValidationSummary, hasErrors } from './exchange-modules/validation.js';
 import {
   $,
   listen,
@@ -13,6 +13,15 @@ import {
   NUMERIC_INPUT_MAX_CHARS
 } from './exchange-modules/utils.js';
 import { getChartTypography } from './chart-typography.js';
+import { allFinite } from './validation-ui.js';
+import {
+  applyChartTableVisibility,
+  updateToggleButtonStates,
+  announceView,
+  VIEW_ANNOUNCEMENTS,
+} from './view-toggle.js';
+
+let currentView = 'chart';
 
 /** Variables are italicised by the Unicode math-italic glyph, not by font-style. */
 const ITALIC_r = '\u{1D45F}'; // 𝑟
@@ -91,7 +100,6 @@ function applyViewportMode() {
   if (!chartBtn || !tableBtn) return;
 
   if (isNarrow()) {
-    chartBtn.disabled = true;
     chartBtn.setAttribute('aria-disabled', 'true');
     chartBtn.setAttribute('aria-describedby', 'chart-helper-text');
     chartBtn.removeAttribute('title');
@@ -99,11 +107,9 @@ function applyViewportMode() {
     if (helper) helper.style.display = 'block';
     switchToTableView();
   } else {
-    chartBtn.disabled = false;
     chartBtn.removeAttribute('aria-disabled');
     chartBtn.removeAttribute('aria-describedby');
     chartBtn.removeAttribute('title');
-    tableBtn.disabled = false;
     tableBtn.removeAttribute('aria-disabled');
     tableBtn.removeAttribute('title');
     if (helper) helper.style.display = 'none';
@@ -112,6 +118,12 @@ function applyViewportMode() {
       renderChart(state.exchangeCalculations, state);
     }
   }
+  updateToggleButtonStates({
+    chartBtn,
+    tableBtn,
+    showingChart: currentView === 'chart',
+    forceTable: isNarrow(),
+  });
 }
 
 function switchToChartView() {
@@ -121,15 +133,16 @@ function switchToChartView() {
   const chartView = $('#chart-view');
   const tableView = $('#table-view');
   if (!chartView || !tableView || !chartBtn || !tableBtn) return;
-  chartView.style.display = 'block';
-  chartView.setAttribute('aria-hidden', 'false');
-  tableView.style.display = 'none';
-  tableView.setAttribute('aria-hidden', 'true');
-  chartBtn.classList.add('active');
-  chartBtn.setAttribute('aria-pressed', 'true');
-  tableBtn.classList.remove('active');
-  tableBtn.setAttribute('aria-pressed', 'false');
-  announceToScreenReader('Chart view active');
+  const changed = currentView !== 'chart';
+  currentView = 'chart';
+  applyChartTableVisibility({
+    chartEl: chartView,
+    tableEl: tableView,
+    canvas: $('#exchange-chart'),
+    showChart: true,
+  });
+  updateToggleButtonStates({ chartBtn, tableBtn, showingChart: true, forceTable: false });
+  if (changed) announceView(VIEW_ANNOUNCEMENTS.chart);
 }
 
 function switchToTableView() {
@@ -138,15 +151,21 @@ function switchToTableView() {
   const chartView = $('#chart-view');
   const tableView = $('#table-view');
   if (!chartView || !tableView || !chartBtn || !tableBtn) return;
-  chartView.style.display = 'none';
-  chartView.setAttribute('aria-hidden', 'true');
-  tableView.style.display = 'block';
-  tableView.setAttribute('aria-hidden', 'false');
-  chartBtn.classList.remove('active');
-  chartBtn.setAttribute('aria-pressed', 'false');
-  tableBtn.classList.add('active');
-  tableBtn.setAttribute('aria-pressed', 'true');
-  announceToScreenReader('Table view active');
+  const changed = currentView !== 'table';
+  currentView = 'table';
+  applyChartTableVisibility({
+    chartEl: chartView,
+    tableEl: tableView,
+    canvas: $('#exchange-chart'),
+    showChart: false,
+  });
+  updateToggleButtonStates({
+    chartBtn,
+    tableBtn,
+    showingChart: false,
+    forceTable: isNarrow(),
+  });
+  if (changed) announceView(VIEW_ANNOUNCEMENTS.table);
   renderTable(state.exchangeCalculations, state);
 }
 
@@ -180,11 +199,11 @@ function setupInputListeners() {
       value = Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals);
       input.value = value.toFixed(decimals);
       
-      const error = validateField(field, value);
-      updateFieldError(id, error);
-      const errors = { ...state.errors };
-      delete errors.calculation;
-      if (error) { errors[field] = error; } else { delete errors[field]; }
+      const candidate = { ...state, [field]: value };
+      const errors = validateAll(candidate);
+      updateFieldError('spot-rate', errors.spotRate || null);
+      updateFieldError('domestic-rate', errors.domesticRate || null);
+      updateFieldError('foreign-rate', errors.foreignRate || null);
       setState({ [field]: value, errors });
       updateValidationSummary(errors);
       updateCalculations();
@@ -204,6 +223,15 @@ function updateCalculations() {
   if (hasErrors(errors)) { setState({ exchangeCalculations: null }); return; }
   try {
     const calculations = calculateExchangeMetrics({ spotRate, domesticRate, foreignRate });
+    if (!allFinite(
+      calculations.forwardRate,
+      calculations.domesticEndingValue,
+      calculations.foreignEndingValue,
+      calculations.domesticEquivalent
+    )) {
+      setState({ exchangeCalculations: null });
+      return;
+    }
     setState({ exchangeCalculations: calculations });
   } catch (error) {
     console.error('Calculation error:', error);
