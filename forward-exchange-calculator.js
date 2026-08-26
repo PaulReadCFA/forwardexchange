@@ -22,6 +22,7 @@ import {
 } from './view-toggle.js';
 
 let currentView = 'chart';
+let exchangeFocusIndex = 0;
 
 /** Variables are italicised by the Unicode math-italic glyph, not by font-style. */
 const ITALIC_r = '\u{1D45F}'; // 𝑟
@@ -142,6 +143,7 @@ function switchToChartView() {
     showChart: true,
   });
   updateToggleButtonStates({ chartBtn, tableBtn, showingChart: true, forceTable: false });
+  syncChartPointRegion(true);
   if (changed) announceView(VIEW_ANNOUNCEMENTS.chart);
 }
 
@@ -165,8 +167,23 @@ function switchToTableView() {
     showingChart: false,
     forceTable: isNarrow(),
   });
+  syncChartPointRegion(false);
   if (changed) announceView(VIEW_ANNOUNCEMENTS.table);
   renderTable(state.exchangeCalculations, state);
+}
+
+function syncChartPointRegion(showingChart) {
+  const canvas = $('#exchange-chart');
+  if (canvas) canvas.tabIndex = showingChart ? 0 : -1;
+  const region = $('#chart-point-announcement');
+  if (!region) return;
+  if (showingChart) {
+    region.textContent = '';
+    region.removeAttribute('aria-hidden');
+  } else {
+    region.setAttribute('aria-hidden', 'true');
+    region.textContent = '';
+  }
 }
 
 function setupViewToggle() {
@@ -770,6 +787,66 @@ function renderChart(calc, params) {
       }
     }
   });
+  setupExchangeChartKeyboard(canvas, calc, params);
+}
+
+function setupExchangeChartKeyboard(canvas, calc, params) {
+  if (canvas._exchangeKeydown) canvas.removeEventListener('keydown', canvas._exchangeKeydown);
+  if (canvas._exchangeFocus) canvas.removeEventListener('focus', canvas._exchangeFocus);
+  if (canvas._exchangeBlur) canvas.removeEventListener('blur', canvas._exchangeBlur);
+
+  const stops = [
+    { speech: `Spot exchange rate S at t equals 0: ${params.spotRate.toFixed(4)}.`, barIndex: 0 },
+    { speech: `Implied forward exchange rate F at t equals 1: ${calc.forwardRate.toFixed(4)}.`, barIndex: 2 },
+    { speech: `Domestic interest rate r d: ${params.domesticRate.toFixed(2)}%.`, datasetIndex: 1, dataIndex: 1 },
+    { speech: `Foreign interest rate r f: ${params.foreignRate.toFixed(2)}%.`, datasetIndex: 2, dataIndex: 1 }
+  ];
+
+  const announce = () => {
+    const region = $('#chart-point-announcement');
+    if (region) region.textContent = stops[exchangeFocusIndex].speech;
+    const chart = window.exchangeChart;
+    if (!chart) return;
+    const stop = stops[exchangeFocusIndex];
+    if (stop.barIndex !== undefined) {
+      const bar = chart.getDatasetMeta(0).data[stop.barIndex];
+      if (bar) chart.tooltip.setActiveElements(
+        [{ datasetIndex: 0, index: stop.barIndex }],
+        { x: bar.x, y: bar.y }
+      );
+    } else if (stop.datasetIndex !== undefined) {
+      const point = chart.getDatasetMeta(stop.datasetIndex).data[stop.dataIndex];
+      if (point) chart.tooltip.setActiveElements(
+        [{ datasetIndex: stop.datasetIndex, index: stop.dataIndex }],
+        { x: point.x, y: point.y }
+      );
+    } else {
+      chart.tooltip.setActiveElements([], { x: 0, y: 0 });
+    }
+    chart.update('none');
+  };
+
+  canvas._exchangeKeydown = (event) => {
+    if (event.key === 'ArrowRight') exchangeFocusIndex = Math.min(exchangeFocusIndex + 1, stops.length - 1);
+    else if (event.key === 'ArrowLeft') exchangeFocusIndex = Math.max(exchangeFocusIndex - 1, 0);
+    else if (event.key === 'Home') exchangeFocusIndex = 0;
+    else if (event.key === 'End') exchangeFocusIndex = stops.length - 1;
+    else return;
+    event.preventDefault();
+    announce();
+  };
+  canvas._exchangeFocus = () => {
+    exchangeFocusIndex = 0;
+    announce();
+  };
+  canvas._exchangeBlur = () => {
+    if (!window.exchangeChart) return;
+    window.exchangeChart.tooltip.setActiveElements([], { x: 0, y: 0 });
+    window.exchangeChart.update('none');
+  };
+  canvas.addEventListener('keydown', canvas._exchangeKeydown);
+  canvas.addEventListener('focus', canvas._exchangeFocus);
+  canvas.addEventListener('blur', canvas._exchangeBlur);
 }
 
 // ── Self-tests ────────────────────────────────────────────────────────────────

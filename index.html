@@ -172,7 +172,7 @@
 
           <!-- Chart View -->
           <div id="chart-view">
-            <div class="sr-only" id="exchange-chart-desc" hidden>
+            <div class="sr-only" id="exchange-chart-desc">
               <h3 id="exchange-chart-title">Forward exchange rate analysis chart</h3>
               <p>
                 This chart shows the spot exchange rate at t&thinsp;=&thinsp;0 and the implied forward rate at t&thinsp;=&thinsp;1 as bars, with domestic and foreign interest rates as horizontal lines between them.
@@ -180,13 +180,18 @@
                 All chart data is available in the Table view. To switch, activate the Table button above.
               </p>
             </div>
+            <p id="chart-keyboard-help" class="sr-only">
+              Use Left and Right arrow keys to move among spot rate, implied forward rate, domestic interest rate, and foreign interest rate. Home moves to spot rate and End moves to foreign interest rate.
+            </p>
+            <p id="chart-point-announcement" class="sr-only" aria-live="polite" aria-atomic="true"></p>
 
             <div id="chart-container" class="chart-wrapper"
                  style="height: 28rem;">
               <canvas id="exchange-chart"
+                      tabindex="0"
                       role="img"
                       aria-labelledby="exchange-chart-title"
-                      aria-describedby="exchange-chart-desc"></canvas>
+                      aria-describedby="exchange-chart-desc chart-keyboard-help"></canvas>
             </div>
           </div>
 
