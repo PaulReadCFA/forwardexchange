@@ -353,7 +353,7 @@ function renderDynamicEquation(calc, params) {
 
   container.innerHTML = `
     <div style="font-size: 1.25rem; padding: 0.5rem; text-align: center;">
-      $$\\color{#50037f}{F_{0,f/d}} = \\color{#0079a6}{${params.spotRate.toFixed(4)}} \\times e^{(\\color{#ea792d}{${rf}} - \\color{#7a46ff}{${rd}})} = \\color{#50037f}{${calc.forwardRate.toFixed(4)}}$$
+      $$\\color{#50037f}{F_{0,f/d}} = \\color{#0079a6}{${params.spotRate.toFixed(4)}} \\times e^{(\\color{#8b4513}{${rf}} - \\color{#7a46ff}{${rd}})} = \\color{#50037f}{${calc.forwardRate.toFixed(4)}}$$
     </div>
   `;
   
@@ -364,11 +364,12 @@ function renderDynamicEquation(calc, params) {
         span.setAttribute('role', 'math');
         span.removeAttribute('tabindex');
       });
-      // Update section aria-label so SR users hear the result on first load
-      // and after every recalculation — no input change needed
-      const equationCard = $('#equation-card');
-      if (equationCard) {
-        equationCard.setAttribute('aria-label',
+      // Label the equation region, not the card: the card is named by its
+      // heading via aria-labelledby, which wins over aria-label and would
+      // silently swallow the result.
+      const region = $('#dynamic-equation-container');
+      if (region) {
+        region.setAttribute('aria-label',
           `Implied forward exchange rate equation. ` +
           `Forward rate equals spot rate ${params.spotRate.toFixed(4)} ` +
           `times e to the power of foreign rate ${rf} minus domestic rate ${rd}. ` +
