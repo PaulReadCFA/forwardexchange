@@ -13,6 +13,7 @@ import {
   NUMERIC_INPUT_MAX_CHARS
 } from './exchange-modules/utils.js';
 import { getChartTypography } from './chart-typography.js';
+import { renderEquation } from './equation-render.js';
 import { allFinite } from './validation-ui.js';
 import {
   applyChartTableVisibility,
@@ -54,16 +55,6 @@ function init() {
 
   // Re-evaluate on resize (debounced)
   window.addEventListener('resize', debounce(applyViewportMode, 200));
-  
-  if (window.MathJax) {
-    window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub], function() {
-      const spans = document.querySelectorAll('.MathJax');
-      spans.forEach(function(span) {
-        span.setAttribute('role', 'math');
-        span.removeAttribute('tabindex');
-      });
-    });
-  }
   
   runSelfTests();
 }
@@ -346,24 +337,41 @@ function renderDynamicEquation(calc, params) {
     srDescription.textContent = `Forward rate equals spot rate ${params.spotRate.toFixed(4)} times e to the power of foreign rate ${rf} minus domestic rate ${rd}, which equals ${calc.forwardRate.toFixed(4)}`;
   }
   
-  // Lock height and hide — prevents both layout jump and LaTeX flash
-  const currentHeight = container.offsetHeight;
-  container.style.height = `${currentHeight}px`;
-  container.style.visibility = 'hidden';
-
-  container.innerHTML = `
+  const mathML = `
     <div style="font-size: 1.25rem; padding: 0.5rem; text-align: center;">
-      $$\\color{#50037f}{F_{0,f/d}} = \\color{#0079a6}{${params.spotRate.toFixed(4)}} \\times e^{(\\color{#8b4513}{${rf}} - \\color{#7a46ff}{${rd}})} = \\color{#50037f}{${calc.forwardRate.toFixed(4)}}$$
+      <math xmlns="http://www.w3.org/1998/Math/MathML" display="block">
+        <mrow>
+          <msub>
+            <mi mathcolor="#50037F">F</mi>
+            <mrow>
+              <mn>0</mn><mo>,</mo>
+              <mrow><mi>f</mi><mo>/</mo><mi>d</mi></mrow>
+            </mrow>
+          </msub>
+          <mo>=</mo>
+          <mn mathcolor="#0079A6">${params.spotRate.toFixed(4)}</mn>
+          <mo>&#x00D7;</mo>
+          <msup>
+            <mi>e</mi>
+            <mrow>
+              <mo>(</mo>
+              <mn mathcolor="#8B4513">${rf}</mn>
+              <mo>&#x2212;</mo>
+              <mn mathcolor="#7A46FF">${rd}</mn>
+              <mo>)</mo>
+            </mrow>
+          </msup>
+          <mo>=</mo>
+          <mn mathcolor="#50037F">${calc.forwardRate.toFixed(4)}</mn>
+        </mrow>
+      </math>
     </div>
   `;
   
-  if (window.MathJax) {
-    window.MathJax.Hub.Queue(["Typeset", window.MathJax.Hub, container], function() {
-      const spans = container.querySelectorAll('.MathJax');
-      spans.forEach(function(span) {
-        span.setAttribute('role', 'math');
-        span.removeAttribute('tabindex');
-      });
+  // The shared mount holds the card's height and hides the raw MathML while
+  // MathJax typesets, so the cards below stay put.
+  renderEquation(container, mathML, {
+    onTypeset: () => {
       // Label the equation region, not the card: the card is named by its
       // heading via aria-labelledby, which wins over aria-label and would
       // silently swallow the result.
@@ -376,14 +384,8 @@ function renderDynamicEquation(calc, params) {
           `Result: ${calc.forwardRate.toFixed(4)}`
         );
       }
-      // Release fixed height then reveal
-      container.style.height = '';
-      container.style.visibility = 'visible';
-    });
-  } else {
-    container.style.height = '';
-    container.style.visibility = 'visible';
-  }
+    },
+  });
 }
 
 // ── Table ─────────────────────────────────────────────────────────────────────
