@@ -9,11 +9,11 @@ import {
   formatPercentage,
   announceToScreenReader,
   clampNumericInputLength,
-  applyTableRoles,
   NUMERIC_INPUT_MAX_CHARS
 } from './exchange-modules/utils.js';
 import { getChartTypography } from './chart-typography.js';
 import { renderEquation } from './equation-render.js';
+import { applyTableRoles } from './table-roles.js';
 import { allFinite } from './validation-ui.js';
 import {
   applyChartTableVisibility,
