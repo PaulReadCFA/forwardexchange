@@ -334,7 +334,7 @@ function renderDynamicEquation(calc, params) {
   const rf = (params.foreignRate / 100).toFixed(3);
   
   if (srDescription) {
-    srDescription.textContent = `Forward rate equals spot rate ${params.spotRate.toFixed(4)} times e to the power of foreign rate ${rf} minus domestic rate ${rd}, which equals ${calc.forwardRate.toFixed(4)}`;
+    srDescription.textContent = `Forward rate equals spot rate ${params.spotRate.toFixed(4)} times e to the power of foreign rate ${rf} minus domestic rate ${rd}, times t, where t equals ${calc.t} year, which equals ${calc.forwardRate.toFixed(4)}`;
   }
   
   const mathML = `
@@ -359,6 +359,7 @@ function renderDynamicEquation(calc, params) {
               <mo>&#x2212;</mo>
               <mn mathcolor="#7A46FF">${rd}</mn>
               <mo>)</mo>
+              <mi>t</mi>
             </mrow>
           </msup>
           <mo>=</mo>
@@ -380,7 +381,8 @@ function renderDynamicEquation(calc, params) {
         region.setAttribute('aria-label',
           `Implied forward exchange rate equation. ` +
           `Forward rate equals spot rate ${params.spotRate.toFixed(4)} ` +
-          `times e to the power of foreign rate ${rf} minus domestic rate ${rd}. ` +
+          `times e to the power of foreign rate ${rf} minus domestic rate ${rd}, times t, ` +
+          `where t equals ${calc.t} year. ` +
           `Result: ${calc.forwardRate.toFixed(4)}`
         );
       }
@@ -862,6 +864,7 @@ function runSelfTests() {
   console.log('Running self-tests...');
   const result = calculateExchangeMetrics({ spotRate: 1.25, domesticRate: 2.5, foreignRate: 3.0 });
   logSelfTest('Defaults → F ≈ 1.2563', Math.abs(result.forwardRate - 1.2563) <= 0.001, `got ${result.forwardRate}`);
+  logSelfTest('Horizon t is fixed at 1 year', result.t === 1);
   logSelfTest('Valid outputs are finite', Number.isFinite(result.forwardRate));
 
   const empty = validateAll({ spotRate: NaN, domesticRate: 2.5, foreignRate: 3.0 });

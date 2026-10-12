@@ -2,9 +2,11 @@ export function calculateForwardExchange({ spotRate, domesticRate, foreignRate }
   const r_d = domesticRate / 100;
   const r_f = foreignRate / 100;
   const initialInvestment = 1000;
-  
-  // Forward rate using covered interest rate parity: F = S × e^(r_f - r_d)
-  const forwardRate = spotRate * Math.exp(r_f - r_d);
+  // The explorer horizon is fixed at one year. The displayed formula is the
+  // general covered-interest form F = S × e^((r_f − r_d) t).
+  const t = 1;
+
+  const forwardRate = spotRate * Math.exp((r_f - r_d) * t);
   
   // Domestic investment strategy
   const domesticEndingValue = initialInvestment * (1 + r_d);
@@ -38,6 +40,7 @@ export function calculateForwardExchange({ spotRate, domesticRate, foreignRate }
     domesticEquivalent,
     arbitrageDiff,
     noArbitrage,
+    t,
     isValid: spotRate > 0 && r_d > -1 && r_f > -1
   };
 }
